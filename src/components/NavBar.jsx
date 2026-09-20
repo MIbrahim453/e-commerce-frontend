@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Layout, Button, Badge, Avatar, Drawer } from "antd"
 import { NavLink, Link, useNavigate } from "react-router-dom"
-import { ShoppingCartOutlined, UserOutlined, MenuOutlined, CloseOutlined, LogoutOutlined } from "@ant-design/icons"
+import { ShoppingCartOutlined, UserOutlined, MenuOutlined, CloseOutlined, LogoutOutlined, SearchOutlined } from "@ant-design/icons"
 import logo from "../assets/logo/logo.png"
 import SearchBar from "./SearchBar"
 
@@ -15,8 +15,9 @@ const navLinks = [
 ]
 
 function NavBar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(true)
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
+  const [showMobileSearch, setShowMobileSearch] = useState(false)
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -25,100 +26,126 @@ function NavBar() {
   }
 
   return (
-    <Header className="bg-surface! border-b! border-border! px-4! sm:px-8! h-16! sm:h-20! flex! items-center! justify-between! gap-3! sm:gap-6! sticky! top-0! z-50!">
-      <div className="flex! items-center! gap-3! sm:gap-6! lg:gap-8! shrink-0!">
-        <button
-          type="button"
-          aria-label="Open navigation menu"
-          onClick={() => setIsOpen(true)}
-          className="md:hidden! flex! items-center! justify-center! w-9! h-9! rounded-full! hover:bg-canvas! transition-colors! cursor-pointer! text-text-primary! border-0! bg-transparent!"
-        >
-          <MenuOutlined className="text-xl! text-text-primary!" />
-        </button>
+    <Header className="bg-surface! border-b! border-border! sticky! top-0! z-50! p-0! h-auto! leading-normal!">
+      <div className="px-4! sm:px-8! h-16! sm:h-20! flex! items-center! justify-between! gap-2! sm:gap-6!">
+        <div className="flex! items-center! gap-2! sm:gap-6! lg:gap-8! shrink-0!">
+          <button
+            type="button"
+            aria-label="Open navigation menu"
+            onClick={() => setIsOpen(true)}
+            className="md:hidden! flex! items-center! justify-center! w-9! h-9! rounded-full! hover:bg-canvas! transition-colors! cursor-pointer! text-text-primary! border-0! bg-transparent!"
+          >
+            <MenuOutlined className="text-xl! text-text-primary!" />
+          </button>
 
-        <Link to="/" className="flex! items-center!">
-          <img src={logo} alt="shop." className="h-6! sm:h-7! w-auto! object-contain!" />
-        </Link>
+          <Link to="/" className="flex! items-center!">
+            <img src={logo} alt="shop." className="h-6! sm:h-7! w-auto! object-contain!" />
+          </Link>
 
-        <nav className="hidden! md:flex! items-center! gap-1.5! sm:gap-2!">
-          {navLinks.map(({ label, to }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={to === "/"}
-              className={({ isActive }) =>
-                `text-sm! font-semibold! tracking-[-0.02em]! transition-all! px-4! py-1.5! rounded-full! duration-300! ${isActive
-                  ? "bg-[#f0eded]! text-text-primary!"
-                  : "text-[#474556]! hover:text-text-primary! hover:bg-canvas!"
-                }`
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
-        </nav>
+          <nav className="hidden! md:flex! items-center! gap-1.5! sm:gap-2!">
+            {navLinks.map(({ label, to }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === "/"}
+                className={({ isActive }) =>
+                  `text-sm! font-semibold! tracking-[-0.02em]! transition-all! px-4! py-1.5! rounded-full! duration-300! ${isActive
+                    ? "bg-[#f0eded]! text-text-primary!"
+                    : "text-[#474556]! hover:text-text-primary! hover:bg-canvas!"
+                  }`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </nav>
+        </div>
+
+        <div className="hidden! md:block! flex-1! max-w-xs! sm:max-w-md! lg:max-w-lg! mx-auto!">
+          <SearchBar />
+        </div>
+
+        <div className="flex! items-center! gap-1.5! sm:gap-3.5! shrink-0!">
+          <button
+            type="button"
+            aria-label={showMobileSearch ? "Close search bar" : "Open search bar"}
+            onClick={() => setShowMobileSearch(!showMobileSearch)}
+            className={`md:hidden! flex! items-center! justify-center! w-9! h-9! rounded-full! transition-colors! cursor-pointer! border-0! ${
+              showMobileSearch
+                ? "bg-canvas! text-primary!"
+                : "bg-transparent! text-text-primary! hover:bg-canvas!"
+            }`}
+          >
+            {showMobileSearch ? (
+              <CloseOutlined className="text-base! text-text-primary!" />
+            ) : (
+              <SearchOutlined className="text-lg! text-text-primary!" />
+            )}
+          </button>
+
+          {!isLoggedIn ? (
+            <div className="flex! items-center! gap-2! sm:gap-3!">
+              <Link to="/login">
+                <Button
+                  type="text"
+                  className="rounded-full! text-text-primary! hover:bg-canvas! text-xs! sm:text-sm! font-medium! px-3! sm:px-4! h-9! sm:h-10!"
+                >
+                  Log in
+                </Button>
+              </Link>
+
+              <Link to="/signup">
+                <Button
+                  type="primary"
+                  className="rounded-full! bg-primary! hover:bg-primary/90! text-on-primary! shadow-violet-glow! text-xs! sm:text-sm! font-semibold! px-3.5! sm:px-5! h-9! sm:h-10! border-0!"
+                >
+                  Sign up
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="flex! items-center! gap-1.5! sm:gap-3.5!">
+              <Link to="/cart" className="flex! items-center! justify-center!">
+                <Badge
+                  count={3}
+                  color="#5433eb"
+                  className="cursor-pointer!"
+                  styles={{ indicator: { fontSize: "11px", fontWeight: 600 } }}
+                >
+                  <div className="w-8! h-8! sm:w-10! sm:h-10! rounded-full! flex! items-center! justify-center! hover:bg-canvas! transition-colors!">
+                    <ShoppingCartOutlined className="text-lg! sm:text-xl! text-text-primary!" />
+                  </div>
+                </Badge>
+              </Link>
+
+              <Link to="/profile" className="flex! items-center!">
+                <Avatar
+                  size={{ xs: 30, sm: 38 }}
+                  icon={<UserOutlined />}
+                  className="bg-canvas! text-text-primary! border! border-border! hover:border-primary! cursor-pointer! transition-colors!"
+                />
+              </Link>
+
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Log out"
+                aria-label="Log out"
+                className="flex! items-center! gap-1.5! px-2.5! sm:px-3.5! py-1.5! sm:py-2! rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-red-600! hover:bg-red-50! border! border-border! hover:border-red-200! transition-all! cursor-pointer! bg-transparent!"
+              >
+                <LogoutOutlined className="text-xs! sm:text-sm!" />
+                <span className="hidden! sm:inline!">Log out</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1! max-w-xs! sm:max-w-md! lg:max-w-lg!">
-        <SearchBar />
-      </div>
-
-      <div className="flex! items-center! gap-2.5! sm:gap-4! shrink-0!">
-        {!isLoggedIn ? (
-          <div className="hidden! md:flex! items-center! gap-2! sm:gap-3!">
-            <Link to="/login">
-              <Button
-                type="text"
-                className="rounded-full! text-text-primary! hover:bg-canvas! text-xs! sm:text-sm! font-medium! px-3! sm:px-4! h-9! sm:h-10!"
-              >
-                Log in
-              </Button>
-            </Link>
-
-            <Link to="/signup">
-              <Button
-                type="primary"
-                className="rounded-full! bg-primary! hover:bg-primary/90! text-on-primary! shadow-violet-glow! text-xs! sm:text-sm! font-semibold! px-4! sm:px-5! h-9! sm:h-10! border-0!"
-              >
-                Sign up
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="flex! items-center! gap-2.5! sm:gap-3.5!">
-            <Link to="/cart" className="flex! items-center! justify-center!">
-              <Badge
-                count={3}
-                color="#5433eb"
-                className="cursor-pointer!"
-                styles={{ indicator: { fontSize: "11px", fontWeight: 600 } }}
-              >
-                <div className="w-9! h-9! sm:w-10! sm:h-10! rounded-full! flex! items-center! justify-center! hover:bg-canvas! transition-colors!">
-                  <ShoppingCartOutlined className="text-lg! sm:text-xl! text-text-primary!" />
-                </div>
-              </Badge>
-            </Link>
-
-            <Link to="/profile" className="flex! items-center!">
-              <Avatar
-                size={{ xs: 32, sm: 38 }}
-                icon={<UserOutlined />}
-                className="bg-canvas! text-text-primary! border! border-border! hover:border-primary! cursor-pointer! transition-colors!"
-              />
-            </Link>
-
-            <button
-              type="button"
-              onClick={handleLogout}
-              title="Log out"
-              className="flex! items-center! gap-1.5! px-3! sm:px-3.5! py-1.5! sm:py-2! rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-red-600! hover:bg-red-50! border! border-border! hover:border-red-200! transition-all! cursor-pointer! bg-transparent!"
-            >
-              <LogoutOutlined className="text-xs!" />
-              <span className="hidden! sm:inline!">Log out</span>
-            </button>
-          </div>
-        )}
-      </div>
+      {showMobileSearch && (
+        <div className="md:hidden! px-4! pb-3! pt-1! bg-surface! border-t! border-border!">
+          <SearchBar autoFocus />
+        </div>
+      )}
 
       <Drawer
         open={isOpen}

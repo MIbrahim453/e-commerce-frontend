@@ -1,7 +1,7 @@
 import { Input, Button } from 'antd'
 import { SearchOutlined, ArrowRightOutlined } from '@ant-design/icons'
 
-function SearchBar() {
+function SearchBar({ autoFocus = false }) {
     return (
         <div className="relative flex items-center w-full bg-surface border border-border rounded-full shadow-level-1 transition-all outline-none duration-200 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15 py-1 px-1.5 pl-3.5 sm:pl-5 h-11 sm:h-12">
             <SearchOutlined className="text-text-secondary text-base sm:text-lg shrink-0 mr-2 sm:mr-3" />
@@ -9,6 +9,7 @@ function SearchBar() {
             <Input
                 placeholder="Search products"
                 variant="borderless"
+                autoFocus={autoFocus}
                 className="flex-1 bg-transparent! p-0! outline-none! rounded-none! text-text-primary! placeholder:text-text-secondary! text-xs sm:text-sm tracking-[-0.031em] font-normal"
             />
 

@@ -19,7 +19,7 @@ export default function SignUp() {
 
   return (
     <div className="h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-y-auto! lg:overflow-hidden!">
-      <div className="w-full! lg:w-1/2! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-5! xl:px-14! xl:py-6! relative! overflow-y-auto! lg:overflow-hidden!">
+      <div className="w-full! lg:w-1/2! min-h-screen! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-5! xl:px-14! xl:py-6! relative! overflow-y-auto! lg:overflow-hidden!">
         <div className="pointer-events-none! absolute! top-0! left-0! w-72! h-72! bg-[#5433eb]/5! rounded-full! blur-3xl!" />
 
         <div className="relative! z-10! flex! items-center! justify-start!">
@@ -253,7 +253,7 @@ export default function SignUp() {
         </div>
       </div>
 
-      <div className="w-full! lg:w-1/2! relative! min-h-[340px]! lg:h-screen! flex! flex-col! justify-center! p-6! sm:p-8! lg:p-12! xl:p-16! overflow-hidden! shrink-0!">
+      <div className="hidden! lg:flex! lg:w-1/2! relative! lg:h-screen! flex-col! justify-center! p-6! sm:p-8! lg:p-12! xl:p-16! overflow-hidden! shrink-0!">
         <img
           src={signupHeroImg}
           alt="Curated modern living architecture"

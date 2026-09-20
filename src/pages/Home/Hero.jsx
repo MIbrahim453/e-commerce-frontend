@@ -1,80 +1,60 @@
 import React from 'react'
 import { Button } from 'antd'
-import { ArrowRightOutlined, CheckCircleOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, CheckCircleOutlined, CarOutlined } from '@ant-design/icons'
 import heroImg from '../../assets/images/hero.png'
 
 function Hero() {
   return (
-    <section className="w-full! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-6! sm:py-10!">
-      <div className="bg-surface! rounded-card! p-6! sm:p-10! lg:p-12! xl:p-16! shadow-level-1! border! border-border!">
-        <div className="grid! grid-cols-1! lg:grid-cols-2! items-center! gap-8! sm:gap-10! lg:gap-12! xl:gap-16!">
-          <div className="flex! flex-col! items-start! gap-6! sm:gap-8!">
-            <div className="inline-flex! items-center! gap-2! px-3.5! py-1.5! rounded-full! bg-canvas! border! border-border!">
-              <span className="w-1.5! h-1.5! rounded-full! bg-primary!" />
-              <span className="text-label-sm! font-medium! text-text-secondary!">
-                Spring Collection 2025
-              </span>
-            </div>
-            <h1 className="text-display-lg-mobile! lg:text-display-lg! font-semibold! text-text-primary! leading-[1.08]! m-0!">
-              Shop smarter.
-              <br />
-              Live better<span className="text-primary!">.</span>
-            </h1>
-            <p className="text-body-md! sm:text-body-lg! text-text-secondary! font-normal! leading-relaxed! max-w-lg! m-0!">
-              Curated objects for refined living, crafted with deliberate simplicity
-              and delivered seamlessly to your door.
-            </p>
-            <div className="flex! flex-wrap! items-center! gap-3! sm:gap-4! pt-1!">
-              <Button
-                type="primary"
-                icon={<ArrowRightOutlined className="text-xs! sm:text-sm!" />}
-                iconPosition="end"
-                className="rounded-full! bg-primary! hover:bg-primary/90! text-on-primary! shadow-violet-glow! text-label-md! font-semibold! px-6! sm:px-7! h-11! sm:h-12! border-0! inline-flex! items-center! justify-center! transition-transform! active:scale-95!"
-              >
-                Shop now
-              </Button>
+    <section className="relative! w-full! min-h-[460px]! sm:min-h-[500px]! lg:min-h-[calc(100vh-5rem)]! flex! items-center! overflow-hidden! border-b! border-border!">
+      <img
+        src={heroImg}
+        alt="Curated objects for refined living"
+        className="absolute! inset-0! w-full! h-full! object-cover! object-center! lg:object-right!"
+      />
 
-              <Button
-                type="text"
-                className="rounded-full! bg-canvas! hover:bg-[#eae7e7]! text-text-primary! text-label-md! font-medium! px-6! sm:px-7! h-11! sm:h-12! border-0! inline-flex! items-center! justify-center! transition-colors!"
-              >
-                Explore deals
-              </Button>
-            </div>
+      <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/65! to-black/35! sm:bg-gradient-to-r! sm:from-black/85! sm:via-black/60! sm:to-black/20!" />
 
+      <div className="relative! z-10! w-full! max-w-7xl! mx-auto! px-5! sm:px-6! lg:px-8! py-8! sm:py-12! lg:py-14!">
+        <div className="max-w-xl! flex! flex-col! items-start! gap-4! sm:gap-5!">
+          <h1 className="text-3xl! sm:text-4xl! lg:text-5xl! xl:text-[54px]! font-bold! text-white! leading-[1.12]! sm:leading-[1.08]! m-0! tracking-[-0.03em]!">
+            Shop smarter.
+            <br />
+            Live better<span className="text-[#a594fd]!">.</span>
+          </h1>
+          <p className="text-sm! sm:text-base! text-white/90! font-normal! leading-relaxed! max-w-md! sm:max-w-lg! m-0!">
+            Curated objects for refined living, crafted with deliberate simplicity
+            and delivered seamlessly to your door.
+          </p>
+          <div className="flex! flex-row! flex-wrap! items-center! gap-3! sm:gap-4! pt-1! w-full! sm:w-auto!">
+            <Button
+              type="primary"
+              icon={<ArrowRightOutlined className="text-xs! sm:text-sm!" />}
+              iconPosition="end"
+              className="rounded-full! bg-[#5433eb]! hover:bg-[#4324d4]! text-white! shadow-[0_4px_24px_rgba(84,51,235,0.45)]! text-xs! sm:text-sm! font-semibold! px-5! sm:px-7! h-10! sm:h-11! border-0! inline-flex! items-center! justify-center! duration-300! active:scale-95! cursor-pointer!"
+            >
+              Shop now
+            </Button>
 
-            <div className="flex! flex-wrap! items-center! gap-3! sm:gap-4! pt-2! text-text-secondary! text-label-sm! font-medium!">
-              <div className="flex! items-center! gap-1.5!">
-                <svg
-                  className="w-4! h-4! text-primary!"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"
-                  />
-                </svg>
-                <span>Free express delivery</span>
-              </div>
-
-              <span className="text-border!">•</span>
-
-              <div className="flex! items-center! gap-1.5!">
-                <CheckCircleOutlined className="text-primary! text-xs! sm:text-sm!" />
-                <span>Carbon-neutral certified</span>
-              </div>
-            </div>
+            <Button
+              type="text"
+              className="rounded-full! bg-white/15! hover:bg-white/25! backdrop-blur-md! text-white! border! border-white/25! text-xs! sm:text-sm! font-medium! px-5! sm:px-7! h-10! sm:h-11! inline-flex! items-center! justify-center! transition-colors! duration-300! cursor-pointer!"
+            >
+              Explore deals
+            </Button>
           </div>
-          <div className="w-full! h-[280px]! sm:h-[380px]! lg:h-[460px]! xl:h-[500px]! rounded-media! overflow-hidden! bg-canvas! border! border-border!">
-            <img
-              src={heroImg}
-              alt="Curated objects for refined living"
-              className="w-full! h-full! object-cover! object-center! transition-transform! duration-500! hover:scale-105!"
-            />
+
+          <div className="flex! flex-wrap! items-center! gap-x-3.5! gap-y-2! sm:gap-4! pt-1! text-white/85! text-xs! font-medium!">
+            <div className="flex! items-center! gap-1.5!">
+              <CarOutlined className="text-[#a594fd]! text-xs! sm:text-sm!" />
+              <span>Free express delivery</span>
+            </div>
+
+            <span className="text-white/30! hidden! sm:inline!">•</span>
+
+            <div className="flex! items-center! gap-1.5!">
+              <CheckCircleOutlined className="text-[#a594fd]! text-xs! sm:text-sm!" />
+              <span>Carbon-neutral certified</span>
+            </div>
           </div>
         </div>
       </div>

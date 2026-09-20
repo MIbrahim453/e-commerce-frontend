@@ -25,7 +25,7 @@ function CTA() {
             type="primary"
             icon={<ArrowRightOutlined className="text-xs!" />}
             iconPosition="end"
-            className="w-full! sm:w-auto! rounded-full! bg-primary! hover:bg-primary/90! text-on-primary! shadow-violet-glow! text-sm! font-semibold! px-8! h-12! border-0! inline-flex! items-center! justify-center! gap-2! transition-color! active:scale-95!"
+            className="w-full! sm:w-auto! rounded-full! bg-primary! hover:bg-primary/90! text-on-primary! shadow-violet-glow! text-sm! font-semibold! px-8! h-12! border-0! inline-flex! items-center! justify-center! gap-2! transition-color! duration-300! active:scale-95!"
           >
             Start Shopping
           </Button>
@@ -33,7 +33,7 @@ function CTA() {
           <Button
             type="default"
             icon={<CompassOutlined className="text-sm! text-text-secondary!" />}
-            className="w-full! sm:w-auto! rounded-full! bg-canvas! hover:bg-surface! text-text-primary! border! border-border! text-sm! font-semibold! px-7! h-12! inline-flex! items-center! justify-center! gap-2! transition-color! active:scale-95!"
+            className="w-full! sm:w-auto! rounded-full! bg-canvas! hover:bg-surface! text-text-primary! border! border-border! text-sm! font-semibold! px-7! h-12! inline-flex! items-center! justify-center! gap-2! transition-color!  duration-300! active:scale-95!"
           >
             Explore Catalog
           </Button>
