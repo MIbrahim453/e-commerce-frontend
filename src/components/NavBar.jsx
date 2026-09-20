@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Layout, Button, Badge, Avatar, Drawer } from "antd"
-import { NavLink, Link } from "react-router-dom"
-import { ShoppingCartOutlined, UserOutlined, MenuOutlined, CloseOutlined } from "@ant-design/icons"
+import { NavLink, Link, useNavigate } from "react-router-dom"
+import { ShoppingCartOutlined, UserOutlined, MenuOutlined, CloseOutlined, LogoutOutlined } from "@ant-design/icons"
 import logo from "../assets/logo/logo.png"
 import SearchBar from "./SearchBar"
 
@@ -15,9 +15,14 @@ const navLinks = [
 ]
 
 function NavBar() {
-  // Temporary state for design preview (toggle between logged-in and guest view)
   const [isLoggedIn, setIsLoggedIn] = useState(true)
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    setIsLoggedIn(false)
+    navigate("/login")
+  }
 
   return (
     <Header className="bg-surface! border-b! border-border! px-4! sm:px-8! h-16! sm:h-20! flex! items-center! justify-between! gap-3! sm:gap-6! sticky! top-0! z-50!">
@@ -58,7 +63,7 @@ function NavBar() {
         <SearchBar />
       </div>
 
-      <div className="flex! items-center! gap-3! sm:gap-4! shrink-0!">
+      <div className="flex! items-center! gap-2.5! sm:gap-4! shrink-0!">
         {!isLoggedIn ? (
           <div className="hidden! md:flex! items-center! gap-2! sm:gap-3!">
             <Link to="/login">
@@ -80,7 +85,7 @@ function NavBar() {
             </Link>
           </div>
         ) : (
-          <div className="flex! items-center! gap-3! sm:gap-4!">
+          <div className="flex! items-center! gap-2.5! sm:gap-3.5!">
             <Link to="/cart" className="flex! items-center! justify-center!">
               <Badge
                 count={3}
@@ -101,6 +106,16 @@ function NavBar() {
                 className="bg-canvas! text-text-primary! border! border-border! hover:border-primary! cursor-pointer! transition-colors!"
               />
             </Link>
+
+            <button
+              type="button"
+              onClick={handleLogout}
+              title="Log out"
+              className="flex! items-center! gap-1.5! px-3! sm:px-3.5! py-1.5! sm:py-2! rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-red-600! hover:bg-red-50! border! border-border! hover:border-red-200! transition-all! cursor-pointer! bg-transparent!"
+            >
+              <LogoutOutlined className="text-xs!" />
+              <span className="hidden! sm:inline!">Log out</span>
+            </button>
           </div>
         )}
       </div>
@@ -137,7 +152,7 @@ function NavBar() {
               </NavLink>
             ))}
           </nav>
-          {!isLoggedIn && (
+          {!isLoggedIn ? (
             <div className="flex! flex-col! items-center! gap-3! w-full! max-w-xs! mx-auto! pt-6! border-t! border-border!">
               <Link to="/login" onClick={() => setIsOpen(false)} className="w-full!">
                 <Button
@@ -156,6 +171,19 @@ function NavBar() {
                   Sign up
                 </Button>
               </Link>
+            </div>
+          ) : (
+            <div className="flex! flex-col! items-center! gap-3! w-full! max-w-xs! mx-auto! pt-6! border-t! border-border!">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsOpen(false)
+                  handleLogout()
+                }}
+                className="w-full! py-3! rounded-full! text-center! font-semibold! text-sm! text-red-600! bg-red-50! border! border-red-200! cursor-pointer!"
+              >
+                Log out
+              </button>
             </div>
           )}
         </div>
