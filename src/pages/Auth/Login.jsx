@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Form, Input, Button } from 'antd'
 import {
   MailOutlined,
@@ -9,15 +9,28 @@ import {
   GlobalOutlined
 } from '@ant-design/icons'
 import loginInteriorImg from '../../assets/images/login_interior.jpg'
+import useAuth from '../../hooks/useAuth'
+import useMessage from '../../hooks/useMessage'
 
 export default function Login() {
   const [form] = Form.useForm()
+  const navigate = useNavigate()
+  const { login, loading } = useAuth()
+  const message = useMessage()
 
-  const onFinish = (values) => {}
+  const onFinish = async (values) => {
+    const res = await login(values)
+    if (res?.data?.success || res?.success) {
+      message.success(res?.data?.message || res?.message || 'Welcome back! Signed in successfully.')
+      navigate('/')
+    } else {
+      message.error(res?.message || res?.data?.message || 'Invalid email or password')
+    }
+  }
 
   return (
-    <div className="h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-y-auto! lg:overflow-hidden!">
-      <div className="hidden! lg:flex! lg:w-1/2! relative! lg:h-screen! flex-col! justify-between! p-6! sm:p-8! lg:p-8! xl:p-10! overflow-hidden! shrink-0!">
+    <div className="min-h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-x-hidden!">
+      <div className="hidden! lg:flex! lg:w-1/2! relative! lg:h-screen! lg:sticky! lg:top-0! flex-col! justify-between! p-6! sm:p-8! lg:p-8! xl:p-10! overflow-hidden! shrink-0!">
         <img
           src={loginInteriorImg}
           alt="Curated modern living interior"
@@ -41,7 +54,7 @@ export default function Login() {
         </div>
       </div>
 
-      <div className="w-full! lg:w-1/2! min-h-screen! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-5! xl:px-14! xl:py-7! relative! overflow-y-auto! lg:overflow-hidden!">
+      <div className="w-full! lg:w-1/2! min-h-screen! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-5! xl:px-14! xl:py-7! relative! overflow-y-auto! [&::-webkit-scrollbar]:w-1.5! [&::-webkit-scrollbar-track]:bg-transparent! [&::-webkit-scrollbar-thumb]:bg-gray-200! [&::-webkit-scrollbar-thumb]:rounded-full! hover:[&::-webkit-scrollbar-thumb]:bg-gray-300!">
         <div className="pointer-events-none! absolute! top-0! right-0! w-72! h-72! bg-[#5433eb]/5! rounded-full! blur-3xl!" />
 
         <div className="relative! z-10! flex! items-center! justify-start!">
@@ -110,8 +123,11 @@ export default function Login() {
                   Email address
                 </span>
               }
+              rules={[
+                { required: true, message: 'Please enter your email address' },
+                { type: 'email', message: 'Please enter a valid email address' }
+              ]}
               className="mb-2!"
-              initialValue="alex.morgan@designstudio.com"
             >
               <Input
                 prefix={<MailOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
@@ -127,6 +143,9 @@ export default function Login() {
                   Password
                 </span>
               }
+              rules={[
+                { required: true, message: 'Please enter your password' }
+              ]}
               className="mb-1!"
             >
               <Input.Password
@@ -137,18 +156,19 @@ export default function Login() {
             </Form.Item>
 
             <div className="flex! justify-end! -mt-0.5! mb-1!">
-              <a
-                href="#forgot"
+              <Link
+                to="/forgot-password"
                 className="text-[11px]! text-gray-500! hover:text-[#5433eb]! font-medium! no-underline! transition-colors!"
               >
                 Forgot password?
-              </a>
+              </Link>
             </div>
 
             <Form.Item className="mb-0! mt-1!">
               <Button
                 type="primary"
                 htmlType="submit"
+                loading={loading}
                 className="w-full! h-10.5! sm:h-11! rounded-full! bg-[#5433eb]! hover:bg-[#4324d4]! text-white! font-semibold! text-xs! sm:text-[13px]! flex! items-center! justify-center! gap-2! shadow-[0_6px_24px_rgba(84,51,235,0.35)]! transition-all! active:scale-98! cursor-pointer! border-0!"
               >
                 <span>Sign in to Shop</span>

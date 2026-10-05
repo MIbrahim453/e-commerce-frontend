@@ -1,14 +1,15 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom'
-import MainLayout from './layout/MainLayout'
+import { Routes, Route } from "react-router-dom";
+import MainLayout from "./layout/MainLayout";
 
-import Home from './pages/Home/Home'
-import ProductsPage from './pages/Products'
-import ProductDetailPage from './pages/ProductDetail'
-import CheckoutPage from './pages/Checkout'
-import Login from './pages/Auth/Login'
-import SignUp from './pages/Auth/SignUp'
-import ProfilePage from './pages/Profile'
+import Home from "./pages/Home/Home";
+import ProductsPage from "./pages/Products";
+import ProductDetailPage from "./pages/ProductDetail";
+import CheckoutPage from "./pages/Checkout";
+import Login from "./pages/Auth/Login";
+import SignUp from "./pages/Auth/SignUp";
+import ForgotPassword from "./pages/Auth/ForgotPassword";
+import ResetPassword from "./pages/Auth/ResetPassword";
+import ProfilePage from "./pages/Profile";
 
 export default function AppRoutes() {
   return (
@@ -26,6 +27,9 @@ export default function AppRoutes() {
 
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<SignUp />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
     </Routes>
-  )
+  );
 }

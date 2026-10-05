@@ -1,5 +1,5 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Form, Input, Button } from 'antd'
 import {
   MailOutlined,
@@ -8,18 +8,53 @@ import {
   ArrowLeftOutlined,
   ArrowRightOutlined,
   SafetyCertificateOutlined,
-  LockFilled
+  LockFilled,
+  PhoneOutlined,
+  HomeOutlined,
+  GlobalOutlined,
+  EnvironmentOutlined,
+  DownOutlined
 } from '@ant-design/icons'
 import signupHeroImg from '../../assets/images/signup_hero.jpg'
+import useAuth from '../../hooks/useAuth'
+import useMessage from '../../hooks/useMessage'
 
 export default function SignUp() {
   const [form] = Form.useForm()
+  const [showAddress, setShowAddress] = useState(true)
+  const navigate = useNavigate()
+  const { signUp, loading } = useAuth()
+  const message = useMessage()
 
-  const onFinish = (values) => {}
+  const onFinish = async (values) => {
+    const formattedValues = {
+      firstName: values.firstName?.trim(),
+      lastName: values.lastName?.trim(),
+      email: values.email?.trim(),
+      phone: values.phone ? String(values.phone).trim() : '',
+      password: values.password,
+      address: values.address ? {
+        street: values.address.street || '',
+        apartment: values.address.apartment || '',
+        city: values.address.city || '',
+        state: values.address.state || '',
+        zipCode: values.address.zipCode ? Number(values.address.zipCode.toString().replace(/\D/g, '')) : undefined,
+        country: values.address.country || '',
+      } : undefined
+    }
+
+    const res = await signUp(formattedValues)
+    if (res?.data?.success || res?.success) {
+      message.success(res?.data?.message || res?.message || 'Account created successfully! Please sign in.')
+      navigate('/login')
+    } else {
+      message.error(res?.message || res?.data?.message || 'Registration failed')
+    }
+  }
 
   return (
-    <div className="h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-y-auto! lg:overflow-hidden!">
-      <div className="w-full! lg:w-1/2! min-h-screen! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-5! xl:px-14! xl:py-6! relative! overflow-y-auto! lg:overflow-hidden!">
+    <div className="min-h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-x-hidden!">
+      <div className="w-full! lg:w-1/2! min-h-screen! lg:h-screen! bg-white! flex! flex-col! justify-between! p-4! sm:p-6! lg:px-10! lg:py-6! xl:px-14! relative! overflow-y-auto! [&::-webkit-scrollbar]:w-1.5! [&::-webkit-scrollbar-track]:bg-transparent! [&::-webkit-scrollbar-thumb]:bg-gray-200! [&::-webkit-scrollbar-thumb]:rounded-full! hover:[&::-webkit-scrollbar-thumb]:bg-gray-300!">
         <div className="pointer-events-none! absolute! top-0! left-0! w-72! h-72! bg-[#5433eb]/5! rounded-full! blur-3xl!" />
 
         <div className="relative! z-10! flex! items-center! justify-start!">
@@ -32,8 +67,8 @@ export default function SignUp() {
           </Link>
         </div>
 
-        <div className="relative! z-10! w-full! max-w-[400px]! mx-auto! my-auto! py-2!">
-          <div className="text-center! mb-3.5! sm:mb-4!">
+        <div className="relative! z-10! w-full! max-w-[420px]! mx-auto! my-auto! py-3!">
+          <div className="text-center! mb-3! sm:mb-3.5!">
             <div className="text-xl! sm:text-2xl! font-bold! text-[#1a1a1a]! tracking-tight! mb-1!">
               shop<span className="text-[#5433eb]!">.</span>
             </div>
@@ -70,7 +105,7 @@ export default function SignUp() {
             <span>Continue with Google</span>
           </button>
 
-          <div className="relative! flex! items-center! justify-center! my-3! sm:my-3.5!">
+          <div className="relative! flex! items-center! justify-center! my-2.5! sm:my-3!">
             <div className="w-full! h-[1px]! bg-[#f0f0f0]!" />
             <span className="absolute! bg-white! px-2.5! text-[9.5px]! font-semibold! tracking-wider! uppercase! text-gray-400!">
               Or continue with email
@@ -137,6 +172,23 @@ export default function SignUp() {
             </Form.Item>
 
             <Form.Item
+              name="phone"
+              label={
+                <span className="text-[11px]! text-gray-600! font-medium!">
+                  Phone number
+                </span>
+              }
+              className="mb-1.5!"
+              initialValue="+14158924100"
+            >
+              <Input
+                prefix={<PhoneOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                placeholder="e.g. +1 (415) 892-4100"
+                className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+              />
+            </Form.Item>
+
+            <Form.Item
               name="password"
               label={
                 <span className="text-[11px]! text-gray-600! font-medium!">
@@ -153,7 +205,7 @@ export default function SignUp() {
               />
             </Form.Item>
 
-            <div className="mb-2.5! px-1!">
+            <div className="mb-2! px-1!">
               <div className="grid! grid-cols-4! gap-1! mb-1!">
                 <div className="h-1! rounded-full! bg-[#5433eb]!" />
                 <div className="h-1! rounded-full! bg-[#5433eb]!" />
@@ -171,7 +223,106 @@ export default function SignUp() {
               </div>
             </div>
 
-            <div className="flex! flex-col! gap-1.5! mb-2.5!">
+            <div className="my-1.5! rounded-2xl! bg-[#fbfbfc]! border! border-[#ebebeb]! overflow-hidden! transition-all!">
+              <button
+                type="button"
+                onClick={() => setShowAddress(!showAddress)}
+                className="w-full! flex! items-center! justify-between! px-3.5! py-2.5! bg-transparent! border-0! cursor-pointer! text-left! hover:bg-gray-50! transition-colors!"
+              >
+                <div className="flex! items-center! gap-2!">
+                  <EnvironmentOutlined className="text-[#5433eb]! text-xs!" />
+                  <span className="text-xs! font-semibold! text-[#1a1a1a]!">
+                    Address
+                  </span>
+                  <span className="text-[10px]! font-medium! text-gray-400! bg-white! border! border-gray-200! px-2! py-0.5! rounded-full!">
+                    Optional
+                  </span>
+                </div>
+                <div className="flex! items-center! gap-1! text-gray-400!">
+                  <span className="text-[11px]! font-medium!">{showAddress ? "Hide" : "Add"}</span>
+                  <DownOutlined className={`text-[9px]! transition-transform! duration-200! ${showAddress ? "rotate-180!" : ""}`} />
+                </div>
+              </button>
+
+              {showAddress && (
+                <div className="px-3.5! pb-3.5! pt-1! border-t! border-[#f0f0f0]! flex! flex-col! gap-1!">
+                  <Form.Item
+                    name={['address', 'street']}
+                    label={<span className="text-[11px]! text-gray-600! font-medium!">Street</span>}
+                    className="mb-1.5!"
+                  >
+                    <Input
+                      prefix={<HomeOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />}
+                      placeholder="Street address (e.g. 742 Montgomery St)"
+                      className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                    />
+                  </Form.Item>
+
+                  <Form.Item
+                    name={['address', 'apartment']}
+                    label={<span className="text-[11px]! text-gray-600! font-medium!">Apartment</span>}
+                    className="mb-1.5!"
+                  >
+                    <Input
+                      placeholder="Apartment, suite, unit (optional)"
+                      className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                    />
+                  </Form.Item>
+
+                  <div className="grid! grid-cols-2! gap-2.5!">
+                    <Form.Item
+                      name={['address', 'city']}
+                      label={<span className="text-[11px]! text-gray-600! font-medium!">City</span>}
+                      className="mb-1.5!"
+                    >
+                      <Input
+                        placeholder="City"
+                        className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      name={['address', 'state']}
+                      label={<span className="text-[11px]! text-gray-600! font-medium!">State</span>}
+                      className="mb-1.5!"
+                    >
+                      <Input
+                        placeholder="State"
+                        className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                      />
+                    </Form.Item>
+                  </div>
+
+                  <div className="grid! grid-cols-2! gap-2.5!">
+                    <Form.Item
+                      name={['address', 'zipCode']}
+                      label={<span className="text-[11px]! text-gray-600! font-medium!">Zip code</span>}
+                      className="mb-0!"
+                    >
+                      <Input
+                        type="number"
+                        placeholder="Zip code"
+                        className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                      />
+                    </Form.Item>
+
+                    <Form.Item
+                      name={['address', 'country']}
+                      label={<span className="text-[11px]! text-gray-600! font-medium!">Country</span>}
+                      className="mb-0!"
+                    >
+                      <Input
+                        prefix={<GlobalOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />}
+                        placeholder="Country"
+                        className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
+                      />
+                    </Form.Item>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex! flex-col! gap-1.5! my-2!">
               <label className="flex! items-center! gap-2! cursor-pointer! select-none!">
                 <input
                   type="checkbox"
@@ -202,10 +353,11 @@ export default function SignUp() {
               </label>
             </div>
 
-            <Form.Item className="mb-0!">
+            <Form.Item className="mb-0! mt-1!">
               <Button
                 type="primary"
                 htmlType="submit"
+                loading={loading}
                 className="w-full! h-10.5! sm:h-11! rounded-full! bg-[#5433eb]! hover:bg-[#4324d4]! text-white! font-semibold! text-xs! sm:text-[13px]! flex! items-center! justify-center! gap-2! shadow-[0_6px_24px_rgba(84,51,235,0.35)]! transition-all! active:scale-98! cursor-pointer! border-0!"
               >
                 <span>Create Account</span>
@@ -224,7 +376,7 @@ export default function SignUp() {
           </Form>
         </div>
 
-        <div className="relative! z-10! flex! flex-col! items-center! gap-1.5! text-[10.5px]! text-gray-400! pt-1!">
+        <div className="relative! z-10! flex! flex-col! items-center! gap-1.5! text-[10.5px]! text-gray-400! pt-2! pb-2!">
           <div className="flex! items-center! gap-3!">
             <span className="flex! items-center! gap-1!">
               <LockFilled className="text-[10px]! text-gray-400!" />
@@ -253,7 +405,7 @@ export default function SignUp() {
         </div>
       </div>
 
-      <div className="hidden! lg:flex! lg:w-1/2! relative! lg:h-screen! flex-col! justify-center! p-6! sm:p-8! lg:p-12! xl:p-16! overflow-hidden! shrink-0!">
+      <div className="hidden! lg:flex! lg:w-1/2! relative! lg:h-screen! lg:sticky! lg:top-0! flex-col! justify-center! p-6! sm:p-8! lg:p-12! xl:p-16! overflow-hidden! shrink-0!">
         <img
           src={signupHeroImg}
           alt="Curated modern living architecture"
