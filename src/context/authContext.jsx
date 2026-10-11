@@ -29,15 +29,19 @@ function AuthProvider({ children }) {
     setLoading(true);
     try {
       const res = await loginApi(data);
-      if (res.data.success) {
-        setUser(res.data.data.user);
+      if (res.data?.success) {
+        const loggedUser = res.data.data?.user;
+        setUser(loggedUser);
+        if (loggedUser) {
+          localStorage.setItem("user", JSON.stringify(loggedUser));
+        }
         localStorage.setItem("accessToken", res.data.data.accessToken);
         localStorage.setItem("refreshToken", res.data.data.refreshToken);
       }
       return res;
     } catch (error) {
       console.error(error);
-      return error.response.data;
+      return error.response?.data || { success: false, message: error.message };
     } finally {
       setLoading(false);
     }
@@ -46,14 +50,20 @@ function AuthProvider({ children }) {
     setLoading(true);
     try {
       const res = await logoutApi();
-      if (res.data.success) {
+      if (res.data?.success) {
         setUser(null);
-        localStorage.removeItem("accessToken", "refreshToken");
+        localStorage.removeItem("user");
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
       }
       return res;
     } catch (error) {
       console.error(error);
-      return error.response.data;
+      setUser(null);
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      return error.response?.data || { success: false, message: error.message };
     } finally {
       setLoading(false);
     }
