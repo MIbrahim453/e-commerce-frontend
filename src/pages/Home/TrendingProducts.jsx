@@ -59,7 +59,7 @@ function TrendingProducts() {
                         Trending Deals
                     </h2>
                     <Link
-                        to="/catalog"
+                        to="/products/trending"
                         className="text-primary! hover:text-primary/80! text-xs! sm:text-sm! font-medium! tracking-[-0.02em]! inline-flex! items-center! gap-1! transition-colors!"
                     >
                         <span>View all (48)</span>

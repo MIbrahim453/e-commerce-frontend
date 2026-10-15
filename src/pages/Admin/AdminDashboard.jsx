@@ -11,7 +11,6 @@ import {
 } from "@ant-design/icons";
 
 export default function AdminDashboard() {
-  // Pure styling state for tab switching
   const [activeTab, setActiveTab] = useState("All");
 
   const transactions = [
@@ -89,19 +88,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
-      {/* ========================================================================= */}
-      {/* HEADER: Title, Badge, Description & Actions                               */}
-      {/* ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
               Executive Overview
             </h1>
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-canvas text-text-secondary border border-border">
-              Q2 Active
-            </span>
-          </div>
           <p className="text-sm text-text-secondary mt-1">
             Real-time commerce performance and operational indicators across all channels.
           </p>
@@ -121,17 +112,13 @@ export default function AdminDashboard() {
               icon={<PlusOutlined className="text-sm" />}
               className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-5! flex! items-center! gap-2!"
             >
-              Create Promotion
+              Create new Product
             </Button>
           </Link>
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* 4 TOP METRIC CARDS (Exact match to screenshot)                            */}
-      {/* ========================================================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {/* TOTAL REVENUE */}
+
         <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
@@ -380,7 +367,7 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-4">
             {/* Filter Tabs: When clicked, becomes active with a distinct bg cell */}
             <div className="flex items-center gap-1 bg-canvas p-1 rounded-full text-xs font-semibold">
-              {["All", "Paid", "Pending", "Refunded"].map((tab) => {
+              {["All", "Paid", "Pending"].map((tab) => {
                 const isActive = activeTab === tab;
                 return (
                   <button

@@ -1,23 +1,210 @@
-import React, { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Button, Input, Switch, Select, Tag } from "antd";
+import { Button, Input, Switch, Select, message } from "antd";
 import {
   PictureOutlined,
   PlusOutlined,
   DeleteOutlined,
   ArrowRightOutlined,
-  CloseOutlined,
-  GlobalOutlined,
+  UploadOutlined,
+  FireOutlined,
+  ThunderboltOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
+import { createProductApi, getCategoriesApi } from "../../services/adminService";
 
 export default function AdminAddProduct() {
-  const [trackInventory, setTrackInventory] = useState(true);
+  const [formData, setFormData] = useState({
+    name: "",
+    description: "",
+    price: "",
+    discount: "",
+    category: "",
+    images: [],
+    isTrending: false,
+    isNewArrival: false,
+    details: {
+      material: "",
+      color: "",
+      sizes: [],
+      instructions: "",
+    },
+  });
 
+  const fileInputRef = useRef()
+  const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [newSizeName, setNewSizeName] = useState("");
+  const [newSizeStock, setNewSizeStock] = useState("");
+  const numPrice = Number(formData.price) || 0
+  const numDiscount = Number(formData.discount) || 0
+  const discountedPrice = (numPrice - numPrice * (numDiscount / 100)).toFixed(2)
+  const totalStock = formData.details.sizes.reduce((acc, size) => acc + (Number(size.stock) || 0), 0)
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true)
+      try {
+        const res = await getCategoriesApi()
+        if (res?.data?.success) {
+          setCategories(res.data.data?.categories || [])
+        }
+      } catch (error) {
+        console.log(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchCategories()
+  }, [])
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target
+    setFormData((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }))
+  }
+  const handleDetailsChange = (e) => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, details: { ...prev.details, [name]: value } }))
+  }
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files || [])
+
+    setFormData((prev) => ({ ...prev, images: [...prev.images, ...files] }))
+
+    e.target.value = ""
+  }
+
+  const removeImage = (index) => {
+    const updatedImages = formData.images.filter((_, i) => i !== index)
+    setFormData((prev) => ({ ...prev, images: updatedImages }))
+  }
+
+  const handleAddSize = () => {
+    const size = newSizeName.trim()
+    const stock = Number(newSizeStock)
+    if (!size) {
+      message.warning("Please enter size name")
+      return
+    }
+
+    if (!stock || !Number.isInteger(stock) || stock < 0) {
+      message.warning("Please enter valid stock")
+      return
+    }
+    if (formData.details.sizes.some((item) => item.size?.toLowerCase() === size.toLowerCase())) {
+      message.warning(`Size ${size} already exists`)
+      return
+    }
+    setFormData((prev) => ({
+      ...prev,
+      details: {
+        ...prev.details,
+        sizes: [...prev.details.sizes, { size, stock }],
+      },
+    }))
+
+    setNewSizeName("")
+    setNewSizeStock("")
+  }
+
+  const handleStockUpdate = (index, value) => {
+    const stock = Number(value)
+    if (!stock || !Number.isInteger(stock) || stock < 0) {
+      message.warning("Please enter valid stock")
+      return
+    }
+    const updatedSizes = formData.details.sizes.map((item, i) =>
+      i === index ? { ...item, stock } : item
+    )
+    setFormData((prev) => ({ ...prev, details: { ...prev.details, sizes: updatedSizes } }))
+  }
+
+  const removeSize = (index) => {
+    const updatedSizes = formData.details.sizes.filter((_, i) => i !== index)
+    setFormData((prev) => ({ ...prev, details: { ...prev.details, sizes: updatedSizes } }))
+  }
+
+  const handleSubmit = async () => {
+    if (!formData.name.trim()) {
+      message.warning("Please enter product title")
+      return
+    }
+    if (!formData.price) {
+      message.warning("Please enter product price")
+      return
+    }
+    if (!formData.category) {
+      message.warning("Please choose a category")
+      return
+    }
+    if (formData.images.length === 0) {
+      message.warning("Please upload at least one image")
+      return
+    }
+    if (!formData.details.material?.trim()) {
+      message.warning("Please enter product material")
+      return
+    }
+    if (!formData.details.color?.trim()) {
+      message.warning("Please enter product color")
+      return
+    }
+    if (!formData.details.instructions?.trim()) {
+      message.warning("Please enter care/handling instructions")
+      return
+    }
+
+    setLoading(true)
+    try {
+      const data = new FormData()
+      data.append("name", formData.name)
+      data.append("description", formData.description)
+      data.append("price", formData.price)
+      data.append("discount", formData.discount || 0)
+      data.append("category", formData.category)
+      data.append("isTrending", formData.isTrending)
+      data.append("isNewArrival", formData.isNewArrival)
+      data.append("details", JSON.stringify(formData.details))
+
+      formData.images.forEach((img) => {
+        data.append("images", img)
+      })
+
+      const res = await createProductApi(data)
+      if (res && res.data?.success) {
+        message.success(res.data.message || "Product created successfully")
+        clearData()
+      }
+    } catch (error) {
+      console.error(error)
+      const errorMsg = error.response?.data?.message || "Failed to add product"
+      message.error(errorMsg)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const clearData = () => {
+    setFormData({
+          name: "",
+          description: "",
+          price: "",
+          discount: "",
+          category: "",
+          images: [],
+          thumbnail: null,
+          isTrending: false,
+          isNewArrival: false,
+          details: {
+            material: "",
+            color: "",
+            sizes: [],
+            instructions: "",
+          },
+        })
+  }
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
-      {/* ========================================================================= */}
-      {/* BREADCRUMB & TOP ACTIONS (Matching Image 4)                               */}
-      {/* ========================================================================= */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary">
@@ -33,38 +220,29 @@ export default function AdminAddProduct() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Link to="/admin/products">
-            <Button className="rounded-full! text-xs! font-semibold! text-text-primary! bg-surface! hover:bg-canvas! border-border! h-auto! py-2! px-4!">
-              Save as Draft
+          <Button
+            onClick={clearData}
+            className="rounded-full! text-xs! font-semibold! text-text-primary! bg-surface! hover:bg-canvas! border-border! h-auto! py-2! px-4!">
+              Cancel
             </Button>
-          </Link>
 
-          <Link to="/admin/products">
-            <Button
-              type="primary"
-              icon={<ArrowRightOutlined className="text-xs" />}
-              className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-6! flex! items-center! gap-2!"
-            >
-              Publish Product
-            </Button>
-          </Link>
+          <Button
+            type="primary"
+            onClick={handleSubmit}
+            icon={<ArrowRightOutlined className="text-xs" />}
+            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-6! flex! items-center! gap-2!"
+          >
+            Publish Product
+          </Button>
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* 2-COLUMN LAYOUT (Image 4)                                                 */}
-      {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ======================================================================= */}
-        {/* LEFT COLUMN (8 cols)                                                    */}
-        {/* ======================================================================= */}
         <div className="lg:col-span-8 space-y-6">
-          {/* 1. General Information */}
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-text-primary">General Information</h2>
               <span className="text-[11px] font-semibold text-text-secondary bg-canvas px-2.5 py-0.5 rounded-full">
-                Core Attributes
+                Core Details
               </span>
             </div>
 
@@ -73,502 +251,448 @@ export default function AdminAddProduct() {
                 TITLE
               </label>
               <Input
-                defaultValue="Ergonomic Studio Chair"
+                placeholder="e.g. Ergonomic Studio Chair"
+                value={formData.name}
+                name="name"
+                onChange={handleChange}
                 className="py-2.5! px-4! bg-canvas! focus:bg-surface! text-sm! font-semibold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
               />
             </div>
-
             <div>
               <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
                 DESCRIPTION
               </label>
-              <div className="border border-border rounded-2xl overflow-hidden focus-within:border-primary transition-colors bg-surface">
-                {/* Text Formatting Toolbar */}
-                <div className="bg-[#fcf9f8] px-4 py-2 border-b border-border flex items-center gap-4 text-text-secondary text-xs">
-                  <span className="font-bold cursor-pointer hover:text-text-primary">B</span>
-                  <span className="italic cursor-pointer hover:text-text-primary">I</span>
-                  <span className="cursor-pointer hover:text-text-primary">🔗</span>
-                  <span className="cursor-pointer hover:text-text-primary">☰</span>
-                  <span className="cursor-pointer hover:text-text-primary">:::</span>
-                  <span className="cursor-pointer hover:text-text-primary">❝</span>
-                  <span className="cursor-pointer hover:text-text-primary">&lt;/&gt;</span>
-                </div>
-                <Input.TextArea
-                  rows={4}
-                  defaultValue="Sculpted with cold-cure memory foam and encased in hand-loomed oatmeal virgin wool. The cast aluminum base is bead-blasted to an ultra-soft matte texture, ensuring seamless kinetic mobility across natural hardwood and micro-cement atelier floors."
-                  className="p-4! border-0! shadow-none! text-xs! text-text-primary! leading-relaxed! outline-none! resize-none! font-normal!"
-                />
-              </div>
+              <Input.TextArea
+                rows={5}
+                placeholder="Write a clear, simple description of the product..."
+                value={formData.description}
+                name="description"
+                onChange={handleChange}
+                className="p-4! bg-canvas! focus:bg-surface! text-xs! font-normal! text-text-primary! leading-relaxed! rounded-2xl! border-transparent! focus:border-primary! resize-none!"
+              />
             </div>
           </div>
 
-          {/* 2. Product Photography */}
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-text-primary">Product Photography</h2>
-                <p className="text-xs text-text-secondary">
-                  Upload high-resolution editorial imagery (PNG, JPG, or WEBP up to 25MB)
+                <h2 className="text-base font-bold text-text-primary">Product Picture</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Select image files from your local computer (PNG, JPG, or WEBP)
                 </p>
               </div>
               <PictureOutlined className="text-lg text-text-secondary" />
             </div>
 
-            {/* Drag & Drop Area */}
-            <div className="p-8 rounded-2xl border-2 border-dashed border-border hover:border-primary bg-canvas/40 hover:bg-canvas transition-colors text-center cursor-pointer">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              name="images"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+            />
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="p-8 rounded-2xl border-2 border-dashed transition-all text-center cursor-pointer"
+            >
               <div className="w-12 h-12 rounded-2xl bg-surface border border-border flex items-center justify-center mx-auto text-primary text-xl mb-3 shadow-2xs">
-                <PictureOutlined />
+                <UploadOutlined />
               </div>
-              <p className="text-xs text-text-secondary">
-                Drag high-resolution product photos here or{" "}
-                <span className="text-primary font-bold hover:underline">browse files</span>
+              <p className="text-xs text-primary font-medium">
+                browse local files
               </p>
               <p className="text-[11px] text-text-secondary/70 mt-1">
-                Editorial studio shots with neutral backgrounds recommended
+                Selected directly from local machine • Multiple files supported
               </p>
             </div>
 
-            {/* Gallery Thumbnails */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-              {/* Primary Slot */}
-              <div className="relative aspect-square rounded-2xl overflow-hidden border border-border bg-canvas">
-                <img
-                  src="https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=300&q=80"
-                  alt="Chair main"
-                  className="w-full h-full object-cover"
-                />
-                <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-text-primary/80 text-white text-[10px] font-bold">
-                  Primary
-                </span>
-              </div>
+            {formData.images.length > 0 && (
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                    SELECTED IMAGES ({formData.images.length})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <PlusOutlined className="text-[10px]" /> Add more files
+                  </button>
+                </div>
 
-              {/* Slot 2 */}
-              <div className="relative aspect-square rounded-2xl overflow-hidden border border-border bg-canvas">
-                <img
-                  src="https://images.unsplash.com/photo-1580481077195-c328a37db71a?w=300&q=80"
-                  alt="Chair detail"
-                  className="w-full h-full object-cover"
-                />
-              </div>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {formData.images.map((img, index) => (
+                    <div
+                      key={index}
+                      className="relative group aspect-square rounded-2xl overflow-hidden border border-border bg-canvas shadow-xs"
+                    >
+                      <img
+                        src={img instanceof File ? URL.createObjectURL(img) : (img?.url || img)}
+                        alt={`Local image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
 
-              {/* Add Slot */}
-              <button
-                type="button"
-                className="aspect-square rounded-2xl border-2 border-dashed border-border hover:border-primary bg-canvas/30 hover:bg-primary/5 transition-colors flex flex-col items-center justify-center gap-1 text-text-secondary hover:text-primary cursor-pointer"
-              >
-                <PlusOutlined className="text-base" />
-                <span className="text-[11px] font-semibold">Add Slot</span>
-              </button>
+                      {index === 0 && (
+                        <span className="absolute bottom-2 left-2 px-2 py-0.5 rounded-full bg-text-primary/85 text-white text-[10px] font-bold">
+                          Primary
+                        </span>
+                      )}
 
-              {/* Empty Frame */}
-              <div className="aspect-square rounded-2xl border border-dashed border-border bg-canvas/20 flex items-center justify-center text-text-secondary/40">
-                <PictureOutlined className="text-xl" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <Button
+                          type="primary"
+                          danger
+                          size="small"
+                          shape="circle"
+                          onClick={() => removeImage(index)}
+                          icon={<DeleteOutlined />}
+                          className="shadow-sm"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-
-            {/* Unsaved changes footer pill */}
-            <div className="pt-3 border-t border-border flex items-center justify-between text-xs">
-              <span className="text-text-secondary flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-amber-500" />
-                Unsaved changes detected
-              </span>
-              <div className="flex items-center gap-2">
-                <Button size="small" className="rounded-full! border-border! bg-surface! text-xs! font-semibold!">
-                  Discard
-                </Button>
-                <Button
-                  type="primary"
-                  size="small"
-                  className="rounded-full! bg-primary! text-on-primary! text-xs! font-bold! border-0!"
-                >
-                  Publish Product
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* 3. Pricing & Stock */}
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
             <div>
-              <h2 className="text-base font-bold text-text-primary">Pricing & Stock</h2>
-              <p className="text-xs text-text-secondary">
-                Manage commercial values, profit margins, and warehouse availability
+              <h2 className="text-base font-bold text-text-primary">Pricing & Discount</h2>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Set product retail price and optional promotional discount
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                  PRICE ($)
+                  PRODUCT PRICE ($)
                 </label>
                 <Input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
                   prefix={<span className="font-bold text-text-secondary mr-1">$</span>}
-                  defaultValue="260.00"
+                  value={formData.price}
+                  name="price"
+                  onChange={handleChange}
                   className="py-2.5! px-3.5! bg-canvas! focus:bg-surface! text-sm! font-bold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
                 />
               </div>
-
               <div>
                 <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                  COMPARE-AT PRICE ($)
+                  DISCOUNT (%)
                 </label>
                 <Input
-                  prefix={<span className="font-bold text-text-secondary mr-1">$</span>}
-                  defaultValue="320.00"
+                  type="number"
+                  min="0"
+                  max="100"
+                  placeholder="0"
+                  suffix={<span className="font-bold text-text-secondary ml-1">%</span>}
+                  value={formData.discount}
+                  name="discount"
+                  onChange={handleChange}
+
                   className="py-2.5! px-3.5! bg-canvas! focus:bg-surface! text-sm! font-bold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
-                    COST PER ITEM ($)
+            {formData.price > 0 && (
+              <div className="p-4 rounded-2xl bg-canvas border border-border flex items-center justify-between text-xs">
+                <span className="text-text-secondary font-medium">Customer Final Price:</span>
+                <div className="flex items-center gap-2">
+                  {numDiscount > 0 && (
+                    <span className="text-text-secondary line-through font-semibold">
+                      ${numPrice.toFixed(2)}
+                    </span>
+                  )}
+                  <span className="text-sm font-extrabold text-primary">
+                    ${discountedPrice}
                   </span>
-                  <span className="text-[11px] font-bold text-primary">55.8% Margin</span>
-                </div>
-                <Input
-                  prefix={<span className="font-bold text-text-secondary mr-1">$</span>}
-                  defaultValue="115.00"
-                  className="py-2.5! px-3.5! bg-canvas! focus:bg-surface! text-sm! font-bold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                  SKU / BARCODE
-                </label>
-                <Input
-                  defaultValue="SHP-CHR-092"
-                  className="py-2.5! px-3.5! bg-canvas! focus:bg-surface! text-sm! font-bold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
-                />
-              </div>
-            </div>
-
-            {/* Track Inventory Switch using Ant Design Switch */}
-            <div className="p-4 rounded-2xl bg-canvas border border-border flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Switch
-                  checked={trackInventory}
-                  onChange={(checked) => setTrackInventory(checked)}
-                  style={{ backgroundColor: trackInventory ? "#5433eb" : undefined }}
-                />
-                <div>
-                  <p className="text-xs font-bold text-text-primary">Track inventory quantity</p>
-                  <p className="text-[11px] text-text-secondary">
-                    Maintain physical warehouse stock alerts automatically
-                  </p>
+                  {numDiscount > 0 && (
+                    <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full text-[11px] font-bold">
+                      {numDiscount}% OFF
+                    </span>
+                  )}
                 </div>
               </div>
-              <span className="text-xs font-bold text-text-primary bg-surface px-3 py-1.5 rounded-full border border-border">
-                45 units in warehouse
-              </span>
-            </div>
+            )}
           </div>
 
-          {/* 4. Product Variants */}
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-base font-bold text-text-primary">Product Variants</h2>
-                <p className="text-xs text-text-secondary">
-                  Configure sizes, colors, finishes, and specific inventory units
+                <h2 className="text-base font-bold text-text-primary">Product Sizes & Stock</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Configure sizes and track stock inventory units for each size
                 </p>
               </div>
 
-              <Button
-                size="small"
-                icon={<PlusOutlined className="text-xs" />}
-                className="rounded-full! bg-canvas! hover:bg-[#eae7e7]! text-xs! font-bold! text-text-primary! border-0!"
-              >
-                Add Option
-              </Button>
+              <span className="text-xs font-bold text-text-primary bg-canvas px-3 py-1.5 rounded-full border border-border">
+                Total Stock: {totalStock} units
+              </span>
             </div>
 
-            {/* Variant Option Chips */}
-            <div className="space-y-2.5 text-xs">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold text-text-secondary w-16">COLOR:</span>
-                <Tag className="rounded-full! px-3! py-1! bg-canvas! text-text-primary! font-semibold! border-0! m-0! inline-flex! items-center! gap-1.5!">
-                  <span className="w-2 h-2 rounded-full bg-[#e4dfff]" />
-                  Oatmeal Cream
-                  <CloseOutlined className="text-[10px] text-text-secondary cursor-pointer" />
-                </Tag>
-                <Tag className="rounded-full! px-3! py-1! bg-canvas! text-text-primary! font-semibold! border-0! m-0! inline-flex! items-center! gap-1.5!">
-                  <span className="w-2 h-2 rounded-full bg-[#787588]" />
-                  Basalt Gray
-                  <CloseOutlined className="text-[10px] text-text-secondary cursor-pointer" />
-                </Tag>
-                <Tag className="rounded-full! px-3! py-1! bg-canvas! text-text-primary! font-semibold! border-0! m-0! inline-flex! items-center! gap-1.5!">
-                  <span className="w-2 h-2 rounded-full bg-[#1a1a1a]" />
-                  Obsidian Black
-                  <CloseOutlined className="text-[10px] text-text-secondary cursor-pointer" />
-                </Tag>
-              </div>
+            <div className="p-4 rounded-2xl bg-canvas/60 border border-border space-y-3">
+              <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider block">
+                ADD SIZE & STOCK
+              </span>
 
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-[11px] font-bold text-text-secondary w-16">FINISH:</span>
-                <Tag className="rounded-full! px-3! py-1! bg-canvas! text-text-primary! font-semibold! border-0! m-0! inline-flex! items-center! gap-1.5!">
-                  Brushed Aluminum
-                  <CloseOutlined className="text-[10px] text-text-secondary cursor-pointer" />
-                </Tag>
-                <Tag className="rounded-full! px-3! py-1! bg-canvas! text-text-primary! font-semibold! border-0! m-0! inline-flex! items-center! gap-1.5!">
-                  Matte Walnut
-                  <CloseOutlined className="text-[10px] text-text-secondary cursor-pointer" />
-                </Tag>
+              <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+                <div className="sm:col-span-5">
+                  <Input
+                    placeholder="Size name (e.g. S, M, L, XL, Standard)"
+                    value={newSizeName}
+                    onChange={(e) => setNewSizeName(e.target.value)}
+                    className="py-2! px-3! bg-surface! text-xs! font-semibold! text-text-primary! rounded-xl! border-border!"
+                  />
+                </div>
+
+                <div className="sm:col-span-4">
+                  <Input
+                    type="number"
+                    min="0"
+                    placeholder="Stock quantity"
+                    value={newSizeStock}
+                    onChange={(e) => setNewSizeStock(e.target.value)}
+                    className="py-2! px-3! bg-surface! text-xs! font-semibold! text-text-primary! rounded-xl! border-border!"
+                  />
+                </div>
+
+                <div className="sm:col-span-3">
+                  <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={handleAddSize}
+                    className="w-full! rounded-xl! bg-primary! text-on-primary! text-xs! font-bold! h-auto! py-2!"
+                  >
+                    Add Size
+                  </Button>
+                </div>
               </div>
             </div>
 
-            {/* Variants Table Items */}
-            <div className="space-y-2.5 pt-2">
-              {/* Item 1 */}
-              <div className="p-3.5 bg-canvas rounded-2xl border border-border flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-surface border border-border text-text-primary font-bold text-[10px] flex items-center justify-center">
-                    OC
-                  </div>
-                  <div>
-                    <p className="font-bold text-text-primary">
-                      Oatmeal Cream / Brushed Aluminum
-                    </p>
-                    <p className="text-[11px] text-text-secondary">Default Presentation</p>
-                  </div>
+            {/* List of sizes with stock */}
+            <div className="space-y-2.5">
+              {formData.details.sizes.length === 0 ? (
+                <div className="text-center py-6 text-xs text-text-secondary">
+                  No sizes added yet. Add a size with stock above.
                 </div>
+              ) : (
+                formData.details.sizes.map((item, index) => (
+                  <div
+                    key={index}
+                    className="p-3.5 bg-canvas rounded-2xl border border-border flex items-center justify-between gap-3 text-xs"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-surface border border-border text-text-primary font-bold text-xs flex items-center justify-center">
+                        {item.size.length <= 3 ? item.size : item.size.substring(0, 2)}
+                      </div>
+                      <div>
+                        <p className="font-bold text-text-primary">Size: {item.size}</p>
+                        <p className="text-[11px] text-text-secondary">
+                          Available for purchase
+                        </p>
+                      </div>
+                    </div>
 
-                <div className="flex items-center gap-3">
-                  <span className="font-extrabold text-text-primary">$260.00</span>
-                  <span className="text-text-secondary font-mono text-[11px]">SHP-CHR-092-OC</span>
-                  <span className="bg-surface px-2.5 py-1 rounded-lg border border-border font-bold text-text-primary text-[11px]">
-                    18 units
-                  </span>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    className="p-0!"
-                  />
-                </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1.5 bg-surface px-2.5 py-1 rounded-xl border border-border">
+                        <span className="text-[11px] font-medium text-text-secondary">Stock:</span>
+                        <input
+                          type="number"
+                          min="0"
+                          value={item.stock}
+                          onChange={(e) => handleStockUpdate(index, e.target.value)}
+                          className="w-14 text-center text-xs font-bold text-text-primary bg-transparent outline-none"
+                        />
+                        <span className="text-[11px] text-text-secondary">units</span>
+                      </div>
+
+                      <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => removeSize(index)}
+                        className="p-0!"
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* 5. Product Details & Specifications */}
+          <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-base font-bold text-text-primary">Details & Specifications</h2>
+                <p className="text-xs text-text-secondary mt-0.5">
+                  Set material composition, color palette, and care instructions
+                </p>
+              </div>
+              <span className="text-[11px] font-semibold text-text-secondary bg-canvas px-2.5 py-0.5 rounded-full">
+                Specifications
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Material */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+                  MATERIAL
+                </label>
+                <Input
+                  placeholder="e.g. 100% Cotton, Walnut Wood, Genuine Leather"
+                  value={formData.details.material}
+                  name="material"
+                  onChange={handleDetailsChange}
+                  className="py-2.5! px-4! bg-canvas! focus:bg-surface! text-xs! font-semibold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
+                />
               </div>
 
-              {/* Item 2 */}
-              <div className="p-3.5 bg-canvas rounded-2xl border border-border flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-surface border border-border text-text-primary font-bold text-[10px] flex items-center justify-center">
-                    BG
-                  </div>
-                  <div>
-                    <p className="font-bold text-text-primary">
-                      Basalt Gray / Brushed Aluminum
-                    </p>
-                    <p className="text-[11px] text-text-secondary">Secondary</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="font-extrabold text-text-primary">$260.00</span>
-                  <span className="text-text-secondary font-mono text-[11px]">SHP-CHR-092-BX</span>
-                  <span className="bg-surface px-2.5 py-1 rounded-lg border border-border font-bold text-text-primary text-[11px]">
-                    14 units
-                  </span>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    className="p-0!"
-                  />
-                </div>
+              {/* Color */}
+              <div>
+                <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+                  COLOR
+                </label>
+                <Input
+                  placeholder="e.g. Matte Black, Sand Beige, Olive Green"
+                  value={formData.details.color}
+                  name="color"
+                  onChange={handleDetailsChange}
+                  className="py-2.5! px-4! bg-canvas! focus:bg-surface! text-xs! font-semibold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
+                />
               </div>
+            </div>
 
-              {/* Item 3 */}
-              <div className="p-3.5 bg-canvas rounded-2xl border border-border flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-surface border border-border text-text-primary font-bold text-[10px] flex items-center justify-center">
-                    OB
-                  </div>
-                  <div>
-                    <p className="font-bold text-text-primary">
-                      Obsidian Black / Matte Walnut
-                    </p>
-                    <p className="text-[11px] text-text-secondary">Premium Edition</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-3">
-                  <span className="font-extrabold text-text-primary">$295.00</span>
-                  <span className="text-text-secondary font-mono text-[11px]">SHP-CHR-092-OE</span>
-                  <span className="bg-surface px-2.5 py-1 rounded-lg border border-border font-bold text-text-primary text-[11px]">
-                    13 units
-                  </span>
-                  <Button
-                    type="text"
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    className="p-0!"
-                  />
-                </div>
-              </div>
+            {/* Care / Usage Instructions */}
+            <div>
+              <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
+                CARE & HANDLING INSTRUCTIONS
+              </label>
+              <Input.TextArea
+                rows={4}
+                placeholder="Write care, washing, or maintenance instructions (e.g. Machine wash cold with like colors. Do not bleach. Tumble dry low)..."
+                value={formData.details.instructions}
+                name="instructions"
+                onChange={handleDetailsChange}
+                className="p-4! bg-canvas! focus:bg-surface! text-xs! font-normal! text-text-primary! leading-relaxed! rounded-2xl! border-transparent! focus:border-primary! resize-none!"
+              />
             </div>
           </div>
         </div>
 
-        {/* ======================================================================= */}
-        {/* RIGHT COLUMN (4 cols)                                                   */}
-        {/* ======================================================================= */}
         <div className="lg:col-span-4 space-y-6">
-          {/* 1. Publishing Status */}
           <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text-primary">Publishing Status</h3>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-            </div>
-
-            <div>
-              <Select
-                defaultValue="active"
-                className="w-full text-xs font-bold"
-                options={[
-                  { value: "active", label: "Active • Available online" },
-                  { value: "draft", label: "Draft • Offline" },
-                ]}
-              />
-            </div>
-
-            {/* Sales Channels Checkboxes */}
-            <div className="space-y-3 pt-2 border-t border-border">
-              <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider block">
-                SALES CHANNELS
+              <h3 className="text-sm font-bold text-text-primary">Product Highlights</h3>
+              <span className="text-[11px] font-semibold text-text-secondary bg-canvas px-2.5 py-0.5 rounded-full">
+                Badges
               </span>
-
-              <label className="flex items-start gap-3 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="rounded border-border text-primary focus:ring-primary mt-0.5"
-                />
-                <div>
-                  <p className="font-bold text-text-primary">Online Store</p>
-                  <p className="text-[11px] text-text-secondary">shop.studio/collections</p>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="rounded border-border text-primary focus:ring-primary mt-0.5"
-                />
-                <div>
-                  <p className="font-bold text-text-primary">Mobile App</p>
-                  <p className="text-[11px] text-text-secondary">iOS and Android app feeds</p>
-                </div>
-              </label>
-
-              <label className="flex items-start gap-3 text-xs cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="rounded border-border text-primary focus:ring-primary mt-0.5"
-                />
-                <div>
-                  <p className="font-bold text-text-primary">Social Marketplace</p>
-                  <p className="text-[11px] text-text-secondary">TikTok & Instagram sync</p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          {/* 2. Organization */}
-          <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-4">
-            <h3 className="text-sm font-bold text-text-primary">Organization</h3>
-
-            <div>
-              <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                CATEGORY
-              </label>
-              <Select
-                defaultValue="modern"
-                className="w-full text-xs font-semibold"
-                options={[
-                  { value: "modern", label: "Modern Living & Furniture" },
-                  { value: "audio", label: "Electronics & Audio" },
-                  { value: "decor", label: "Ceramics & Decor" },
-                ]}
-              />
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                PRODUCT TYPE
-              </label>
-              <Input
-                defaultValue="Seating / Lounge"
-                className="py-2! px-3! bg-canvas! text-xs! font-semibold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                BRAND / VENDOR
-              </label>
-              <Input
-                defaultValue="Studio Atelier"
-                className="py-2! px-3! bg-canvas! text-xs! font-semibold! text-text-primary! rounded-2xl! border-transparent! focus:border-primary!"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-2">
-                TAGS
-              </label>
-              <div className="flex items-center gap-1.5 flex-wrap text-xs">
-                {["Ergonomic", "Minimalist", "Lounge", "Made in Italy"].map((tag) => (
-                  <Tag
-                    key={tag}
-                    className="inline-flex! items-center! gap-1! px-2.5! py-1! rounded-full! bg-canvas! text-text-primary! font-semibold! text-[11px]! border-0! m-0!"
-                  >
-                    {tag}
-                    <CloseOutlined className="text-[9px] text-text-secondary cursor-pointer" />
-                  </Tag>
-                ))}
-                <Button
-                  size="small"
-                  className="rounded-full! border-border! text-[11px]! font-bold! text-text-secondary! hover:text-text-primary! bg-surface!"
+            {/* Trending Option */}
+            <div className="p-3.5 rounded-2xl bg-canvas border border-border flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${formData.isTrending
+                    ? "bg-amber-100 text-amber-600"
+                    : "bg-surface text-text-secondary"
+                    }`}
                 >
-                  + Add Tag
-                </Button>
+                  <FireOutlined />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-text-primary">Trending</p>
+                  <p className="text-[11px] text-text-secondary">
+                    Feature in Trending lists
+                  </p>
+                </div>
               </div>
+
+              <Switch
+                checked={formData.isTrending}
+                onChange={(checked) => setFormData((prev) => ({ ...prev, isTrending: checked }))}
+                style={{ backgroundColor: formData.isTrending ? "#5433eb" : undefined }}
+              />
+            </div>
+
+            {/* New Option */}
+            <div className="p-3.5 rounded-2xl bg-canvas border border-border flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-8 h-8 rounded-xl flex items-center justify-center text-sm ${formData.isNewArrival
+                    ? "bg-indigo-100 text-indigo-600"
+                    : "bg-surface text-text-secondary"
+                    }`}
+                >
+                  <ThunderboltOutlined />
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-text-primary">New Arrival</p>
+                  <p className="text-[11px] text-text-secondary">
+                    Mark as New in catalog
+                  </p>
+                </div>
+              </div>
+
+              <Switch
+                checked={formData.isNewArrival}
+                onChange={(checked) => setFormData((prev) => ({ ...prev, isNewArrival: checked }))}
+                style={{ backgroundColor: formData.isNewArrival ? "#5433eb" : undefined }}
+              />
             </div>
           </div>
 
-          {/* 3. Search Engine Listing */}
-          <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-3">
+          <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-bold text-text-primary">Search Engine Listing</h3>
-              <GlobalOutlined className="text-text-secondary text-sm" />
+              <h3 className="text-sm font-bold text-text-primary">Category Selection</h3>
+              <Link
+                to="/admin/categories"
+                className="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+              >
+                Manage <ArrowRightOutlined className="text-[9px]" />
+              </Link>
             </div>
 
-            <div className="bg-canvas p-4 rounded-2xl space-y-1.5 text-xs">
-              <p className="text-[10px] text-text-secondary font-mono truncate">
-                https://shop.studio/products/ergonomic-studio-...
-              </p>
-              <h4 className="font-bold text-primary hover:underline cursor-pointer leading-tight">
-                Ergonomic Studio Chair | Shop Official Atelier
-              </h4>
-              <p className="text-[11px] text-text-secondary leading-relaxed line-clamp-3">
-                Crafted with brushed aluminum and premium textured fabric, the Ergonomic Studio Chair brings timeless minimalist poise to modern spaces...
-              </p>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+                  SELECT CATEGORY
+                </label>
+                <Link
+                  to="/admin/categories"
+                  className="text-[10px] text-primary hover:underline font-semibold"
+                >
+                  + Create Category
+                </Link>
+              </div>
+              <Select
+                value={formData.category || undefined}
+                loading={loading}
+                onChange={(val) => setFormData((prev) => ({ ...prev, category: val }))}
+                className="w-full text-xs font-semibold"
+                placeholder="Choose a product category"
+                options={categories.map((cat) => ({
+                  label: `${cat.name} (${cat.categoryCollection || "all"})`,
+                  value: cat._id || cat.id || cat.name,
+                }))}
+              />
             </div>
 
-            <Button
-              type="link"
-              className="text-xs! font-bold! text-primary! hover:underline! flex! items-center! gap-1! p-0!"
-            >
-              <span>Edit website SEO metadata</span>
-              <ArrowRightOutlined className="text-[10px]" />
-            </Button>
+            <p className="text-[11px] text-text-secondary leading-relaxed">
+              Assigning a category helps organize your store catalog and lets customers filter products easily.
+            </p>
           </div>
         </div>
       </div>

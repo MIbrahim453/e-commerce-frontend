@@ -25,7 +25,7 @@ export default function AdminOrders() {
     { label: "Unfulfilled", count: 34 },
     { label: "Awaiting Shipment", count: 18 },
     { label: "Fulfilled", count: 362 },
-    { label: "Returned / Cancelled", count: 6 },
+    { label: "Cancelled", count: 6 },
   ];
 
   const orders = [
@@ -107,10 +107,6 @@ export default function AdminOrders() {
               Live Sync Active
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1 flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-            <span>Average processing time: <strong>3.8h</strong></span>
-          </p>
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
@@ -131,14 +127,6 @@ export default function AdminOrders() {
             className="rounded-full! text-xs! font-semibold! text-text-primary! bg-surface! hover:bg-canvas! border-border! h-auto! py-2! px-3.5!"
           >
             Export
-          </Button>
-
-          <Button
-            type="primary"
-            icon={<CheckOutlined />}
-            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-5!"
-          >
-            Bulk Fulfill
           </Button>
         </div>
       </div>

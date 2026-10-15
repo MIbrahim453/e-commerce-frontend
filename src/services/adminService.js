@@ -1,6 +1,5 @@
 import api from "./axios";
 
-// Product & Category APIs
 export const getAllProductsApi = async () => {
   return await api.get("/product/get-products");
 };
@@ -15,6 +14,14 @@ export const getCategoriesApi = async () => {
 
 export const createCategoryApi = async (categoryData) => {
   return await api.post("/product/create-category", categoryData);
+};
+
+export const editCategoryApi = async (id, categoryData) => {
+  return await api.put(`/product/edit-category/${id}`, categoryData);
+};
+
+export const deleteCategoryApi = async (id) => {
+  return await api.delete(`/product/delete-category/${id}`);
 };
 
 export const createProductApi = async (productData) => {

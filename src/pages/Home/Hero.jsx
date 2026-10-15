@@ -2,8 +2,10 @@ import React from 'react'
 import { Button } from 'antd'
 import { ArrowRightOutlined, CheckCircleOutlined, CarOutlined } from '@ant-design/icons'
 import heroImg from '../../assets/images/hero.png'
+import { useNavigate } from 'react-router-dom'
 
 function Hero() {
+  const navigate = useNavigate()
   return (
     <section className="relative! w-full! min-h-[460px]! sm:min-h-[500px]! lg:min-h-[calc(100vh-5rem)]! flex! items-center! overflow-hidden! border-b! border-border!">
       <img
@@ -28,6 +30,7 @@ function Hero() {
           <div className="flex! flex-row! flex-wrap! items-center! gap-3! sm:gap-4! pt-1! w-full! sm:w-auto!">
             <Button
               type="primary"
+              onClick={() => navigate('/products')} 
               icon={<ArrowRightOutlined className="text-xs! sm:text-sm!" />}
               iconPosition="end"
               className="rounded-full! bg-[#5433eb]! hover:bg-[#4324d4]! text-white! shadow-[0_4px_24px_rgba(84,51,235,0.45)]! text-xs! sm:text-sm! font-semibold! px-5! sm:px-7! h-10! sm:h-11! border-0! inline-flex! items-center! justify-center! duration-300! active:scale-95! cursor-pointer!"

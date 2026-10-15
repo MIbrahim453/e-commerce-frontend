@@ -1,9 +1,10 @@
-import { useState } from "react"
+import { useState, useContext } from "react"
 import { Layout, Button, Badge, Avatar, Drawer } from "antd"
 import { NavLink, Link, useNavigate } from "react-router-dom"
 import { ShoppingCartOutlined, UserOutlined, MenuOutlined, CloseOutlined, LogoutOutlined, SearchOutlined } from "@ant-design/icons"
 import logo from "../assets/logo/logo.png"
 import SearchBar from "./SearchBar"
+import { AuthContext } from "../context/authContext"
 
 const { Header } = Layout
 
@@ -15,13 +16,14 @@ const navLinks = [
 ]
 
 function NavBar() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { user, logout } = useContext(AuthContext)
+  const isLoggedIn = Boolean(user)
   const [isOpen, setIsOpen] = useState(false)
   const [showMobileSearch, setShowMobileSearch] = useState(false)
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    setIsLoggedIn(false)
+  const handleLogout = async () => {
+    await logout()
     navigate("/login")
   }
 

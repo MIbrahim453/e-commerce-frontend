@@ -7,6 +7,7 @@ import {
   AppstoreOutlined,
   OrderedListOutlined,
   ShoppingOutlined,
+  TagsOutlined,
   CreditCardOutlined,
   ShopOutlined,
   SearchOutlined,
@@ -57,6 +58,11 @@ export default function AdminLayout() {
       to: "/admin/products",
       label: "Products Catalog",
       icon: <ShoppingOutlined className="text-lg!" />,
+    },
+    {
+      to: "/admin/categories",
+      label: "Categories",
+      icon: <TagsOutlined className="text-lg!" />,
     },
     {
       to: "/admin/payments",

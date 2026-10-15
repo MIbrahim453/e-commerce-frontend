@@ -46,7 +46,7 @@ function ShopByCategory() {
             Shop by Category
           </h2>
           <Link
-            to="/catalog"
+            to="/products"
             className="text-primary! hover:text-primary/80! text-xs! sm:text-sm! font-medium! tracking-[-0.02em]! inline-flex! items-center! gap-1! transition-colors!"
           >
             <span>Explore all</span>
