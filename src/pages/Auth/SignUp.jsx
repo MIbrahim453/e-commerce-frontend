@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Button } from 'antd'
+import React, { useState, useContext } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Form, Input, Button, message } from "antd";
 import {
   MailOutlined,
   LockOutlined,
@@ -13,44 +13,106 @@ import {
   HomeOutlined,
   GlobalOutlined,
   EnvironmentOutlined,
-  DownOutlined
-} from '@ant-design/icons'
-import signupHeroImg from '../../assets/images/signup_hero.jpg'
-import useAuth from '../../hooks/useAuth'
-import useMessage from '../../hooks/useMessage'
+  DownOutlined,
+} from "@ant-design/icons";
+import signupHeroImg from "../../assets/images/signup_hero.jpg";
+import { AuthContext } from "../../context/authContext";
+import { signInWithGoogle } from "../../config/firebase";
 
 export default function SignUp() {
-  const [form] = Form.useForm()
-  const [showAddress, setShowAddress] = useState(true)
-  const navigate = useNavigate()
-  const { signUp, loading } = useAuth()
-  const message = useMessage()
+  const [form] = Form.useForm();
+  const [showAddress, setShowAddress] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { signUp, googleAuth, loading } = useContext(AuthContext);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const redirectAfterAuth = (authUser) => {
+    const target =
+      location.state?.from ||
+      (authUser?.role === "admin" ? "/admin/dashboard" : "/");
+    navigate(target, { replace: true });
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      const result = await signInWithGoogle();
+      const firebaseUser = result.user;
+
+      const nameParts = (firebaseUser.displayName || "").trim().split(" ");
+      const firstName = nameParts[0] || "User";
+      const lastName = nameParts.slice(1).join(" ") || firstName;
+
+      const res = await googleAuth({
+        firstName,
+        lastName,
+        email: firebaseUser.email,
+        profilePhoto: firebaseUser.photoURL,
+        uid: firebaseUser.uid,
+      });
+
+      if (res?.data?.success || res?.success) {
+        message.success(
+          res?.data?.message ||
+          res?.message ||
+          "Signed up and logged in with Google successfully!",
+        );
+        redirectAfterAuth(res?.data?.data?.user);
+      } else {
+        message.error(
+          res?.message || res?.data?.message || "Google sign-up failed",
+        );
+      }
+    } catch (error) {
+      console.error("Google Sign-Up Error:", error);
+      if (
+        error?.code === "auth/popup-closed-by-user" ||
+        error?.code === "auth/cancelled-popup-request"
+      ) {
+        return;
+      }
+      message.error(error?.message || "Google sign-up failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onFinish = async (values) => {
     const formattedValues = {
       firstName: values.firstName?.trim(),
       lastName: values.lastName?.trim(),
       email: values.email?.trim(),
-      phone: values.phone ? String(values.phone).trim() : '',
+      phone: values.phone ? String(values.phone).trim() : "",
       password: values.password,
-      address: values.address ? {
-        street: values.address.street || '',
-        apartment: values.address.apartment || '',
-        city: values.address.city || '',
-        state: values.address.state || '',
-        zipCode: values.address.zipCode ? Number(values.address.zipCode.toString().replace(/\D/g, '')) : undefined,
-        country: values.address.country || '',
-      } : undefined
-    }
+      address: values.address
+        ? {
+          street: values.address.street || "",
+          apartment: values.address.apartment || "",
+          city: values.address.city || "",
+          state: values.address.state || "",
+          zipCode: values.address.zipCode
+            ? Number(values.address.zipCode.toString().replace(/\D/g, ""))
+            : undefined,
+          country: values.address.country || "",
+        }
+        : undefined,
+    };
 
-    const res = await signUp(formattedValues)
+    const res = await signUp(formattedValues);
     if (res?.data?.success || res?.success) {
-      message.success(res?.data?.message || res?.message || 'Account created successfully! Please sign in.')
-      navigate('/login')
+      message.success(
+        res?.data?.message ||
+        res?.message ||
+        "Account created successfully! Please sign in.",
+      );
+      navigate("/login", { state: { from: location.state?.from } });
     } else {
-      message.error(res?.message || res?.data?.message || 'Registration failed')
+      message.error(
+        res?.message || res?.data?.message || "Registration failed",
+      );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-x-hidden!">
@@ -82,7 +144,9 @@ export default function SignUp() {
 
           <button
             type="button"
-            className="w-full! h-10! sm:h-10.5! rounded-full! bg-white! hover:bg-gray-50! border! border-[#ebebeb]! shadow-2xs! flex! items-center! justify-center! gap-2.5! text-xs! sm:text-[13px]! font-semibold! text-gray-800! transition-all! cursor-pointer!"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading || loading}
+            className="w-full! h-10! sm:h-10.5! rounded-full! bg-white! hover:bg-gray-50! border! border-[#ebebeb]! shadow-2xs! flex! items-center! justify-center! gap-2.5! text-xs! sm:text-[13px]! font-semibold! text-gray-800! transition-all! cursor-pointer! disabled:opacity-60! disabled:cursor-not-allowed!"
           >
             <svg className="w-3.5! h-3.5!" viewBox="0 0 24 24">
               <path
@@ -102,7 +166,11 @@ export default function SignUp() {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
               />
             </svg>
-            <span>Continue with Google</span>
+            <span>
+              {googleLoading
+                ? "Connecting to Google..."
+                : "Continue with Google"}
+            </span>
           </button>
 
           <div className="relative! flex! items-center! justify-center! my-2.5! sm:my-3!">
@@ -131,7 +199,9 @@ export default function SignUp() {
                 initialValue="Alex"
               >
                 <Input
-                  prefix={<UserOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />}
+                  prefix={
+                    <UserOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />
+                  }
                   placeholder="First name"
                   className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
                 />
@@ -165,7 +235,9 @@ export default function SignUp() {
               initialValue="alex.morgan@designstudio.com"
             >
               <Input
-                prefix={<MailOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                prefix={
+                  <MailOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
+                }
                 placeholder="name@example.com"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
               />
@@ -182,7 +254,9 @@ export default function SignUp() {
               initialValue="+14158924100"
             >
               <Input
-                prefix={<PhoneOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                prefix={
+                  <PhoneOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
+                }
                 placeholder="e.g. +1 (415) 892-4100"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
               />
@@ -198,7 +272,9 @@ export default function SignUp() {
               className="mb-1!"
             >
               <Input.Password
-                prefix={<LockOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                prefix={
+                  <LockOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
+                }
                 placeholder="Create strong password"
                 defaultValue="••••••••••••"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
@@ -239,28 +315,42 @@ export default function SignUp() {
                   </span>
                 </div>
                 <div className="flex! items-center! gap-1! text-gray-400!">
-                  <span className="text-[11px]! font-medium!">{showAddress ? "Hide" : "Add"}</span>
-                  <DownOutlined className={`text-[9px]! transition-transform! duration-200! ${showAddress ? "rotate-180!" : ""}`} />
+                  <span className="text-[11px]! font-medium!">
+                    {showAddress ? "Hide" : "Add"}
+                  </span>
+                  <DownOutlined
+                    className={`text-[9px]! transition-transform! duration-200! ${showAddress ? "rotate-180!" : ""}`}
+                  />
                 </div>
               </button>
 
               {showAddress && (
                 <div className="px-3.5! pb-3.5! pt-1! border-t! border-[#f0f0f0]! flex! flex-col! gap-1!">
                   <Form.Item
-                    name={['address', 'street']}
-                    label={<span className="text-[11px]! text-gray-600! font-medium!">Street</span>}
+                    name={["address", "street"]}
+                    label={
+                      <span className="text-[11px]! text-gray-600! font-medium!">
+                        Street
+                      </span>
+                    }
                     className="mb-1.5!"
                   >
                     <Input
-                      prefix={<HomeOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />}
+                      prefix={
+                        <HomeOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />
+                      }
                       placeholder="Street address (e.g. 742 Montgomery St)"
                       className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
                     />
                   </Form.Item>
 
                   <Form.Item
-                    name={['address', 'apartment']}
-                    label={<span className="text-[11px]! text-gray-600! font-medium!">Apartment</span>}
+                    name={["address", "apartment"]}
+                    label={
+                      <span className="text-[11px]! text-gray-600! font-medium!">
+                        Apartment
+                      </span>
+                    }
                     className="mb-1.5!"
                   >
                     <Input
@@ -271,8 +361,12 @@ export default function SignUp() {
 
                   <div className="grid! grid-cols-2! gap-2.5!">
                     <Form.Item
-                      name={['address', 'city']}
-                      label={<span className="text-[11px]! text-gray-600! font-medium!">City</span>}
+                      name={["address", "city"]}
+                      label={
+                        <span className="text-[11px]! text-gray-600! font-medium!">
+                          City
+                        </span>
+                      }
                       className="mb-1.5!"
                     >
                       <Input
@@ -282,8 +376,12 @@ export default function SignUp() {
                     </Form.Item>
 
                     <Form.Item
-                      name={['address', 'state']}
-                      label={<span className="text-[11px]! text-gray-600! font-medium!">State</span>}
+                      name={["address", "state"]}
+                      label={
+                        <span className="text-[11px]! text-gray-600! font-medium!">
+                          State
+                        </span>
+                      }
                       className="mb-1.5!"
                     >
                       <Input
@@ -295,8 +393,12 @@ export default function SignUp() {
 
                   <div className="grid! grid-cols-2! gap-2.5!">
                     <Form.Item
-                      name={['address', 'zipCode']}
-                      label={<span className="text-[11px]! text-gray-600! font-medium!">Zip code</span>}
+                      name={["address", "zipCode"]}
+                      label={
+                        <span className="text-[11px]! text-gray-600! font-medium!">
+                          Zip code
+                        </span>
+                      }
                       className="mb-0!"
                     >
                       <Input
@@ -307,12 +409,18 @@ export default function SignUp() {
                     </Form.Item>
 
                     <Form.Item
-                      name={['address', 'country']}
-                      label={<span className="text-[11px]! text-gray-600! font-medium!">Country</span>}
+                      name={["address", "country"]}
+                      label={
+                        <span className="text-[11px]! text-gray-600! font-medium!">
+                          Country
+                        </span>
+                      }
                       className="mb-0!"
                     >
                       <Input
-                        prefix={<GlobalOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />}
+                        prefix={
+                          <GlobalOutlined className="text-gray-400! mr-1.5! text-xs! shrink-0!" />
+                        }
                         placeholder="Country"
                         className="w-full! bg-white! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
                       />
@@ -330,14 +438,21 @@ export default function SignUp() {
                   className="w-3.5! h-3.5! rounded! accent-[#5433eb]! cursor-pointer!"
                 />
                 <span className="text-[11px]! text-gray-600!">
-                  I agree to the{' '}
-                  <a href="#terms" className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!">
+                  I agree to the{" "}
+                  <a
+                    href="#terms"
+                    className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!"
+                  >
                     Terms of Service
-                  </a>{' '}
-                  and{' '}
-                  <a href="#privacy" className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!">
+                  </a>{" "}
+                  and{" "}
+                  <a
+                    href="#privacy"
+                    className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!"
+                  >
                     Privacy Policy
-                  </a>.
+                  </a>
+                  .
                 </span>
               </label>
 
@@ -348,7 +463,8 @@ export default function SignUp() {
                   className="w-3.5! h-3.5! rounded! accent-[#5433eb]! cursor-pointer!"
                 />
                 <span className="text-[11px]! text-gray-600!">
-                  Receive curated drops, private studio releases, and editorial updates.
+                  Receive curated drops, private studio releases, and editorial
+                  updates.
                 </span>
               </label>
             </div>
@@ -367,8 +483,11 @@ export default function SignUp() {
 
             <div className="text-center! pt-2!">
               <span className="text-xs! text-gray-500!">
-                Already have an account?{' '}
-                <Link to="/login" className="text-[#5433eb]! font-semibold! hover:underline! no-underline!">
+                Already have an account?{" "}
+                <Link
+                  to="/login"
+                  className="text-[#5433eb]! font-semibold! hover:underline! no-underline!"
+                >
                   Sign in
                 </Link>
               </span>
@@ -390,15 +509,24 @@ export default function SignUp() {
           </div>
 
           <div className="flex! items-center! gap-3! text-gray-400!">
-            <a href="#concierge" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+            <a
+              href="#concierge"
+              className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+            >
               Concierge Care
             </a>
             <span>•</span>
-            <a href="#trust" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+            <a
+              href="#trust"
+              className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+            >
               Trust &amp; Safety
             </a>
             <span>•</span>
-            <a href="#faq" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+            <a
+              href="#faq"
+              className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+            >
               FAQ
             </a>
           </div>
@@ -420,7 +548,8 @@ export default function SignUp() {
           </h2>
 
           <p className="text-white/80! text-xs! sm:text-sm! leading-relaxed! mb-6! m-0!">
-            Create your account to unlock private studio capsules, personalized recommendations, and expedited checkout across our global catalog.
+            Create your account to unlock private studio capsules, personalized
+            recommendations, and expedited checkout across our global catalog.
           </p>
 
           <div className="flex! items-center! gap-3!">
@@ -447,5 +576,5 @@ export default function SignUp() {
         </div>
       </div>
     </div>
-  )
+  );
 }

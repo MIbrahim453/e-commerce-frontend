@@ -1,32 +1,90 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Form, Input, Button } from 'antd'
+import React, { useState, useContext } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Form, Input, Button, message } from "antd";
 import {
   MailOutlined,
   LockOutlined,
   ArrowLeftOutlined,
   ArrowRightOutlined,
-  GlobalOutlined
-} from '@ant-design/icons'
-import loginInteriorImg from '../../assets/images/login_interior.jpg'
-import useAuth from '../../hooks/useAuth'
-import useMessage from '../../hooks/useMessage'
+  GlobalOutlined,
+} from "@ant-design/icons";
+import loginInteriorImg from "../../assets/images/login_interior.jpg";
+import { AuthContext } from "../../context/authContext";
+import { signInWithGoogle } from "../../config/firebase";
 
 export default function Login() {
-  const [form] = Form.useForm()
-  const navigate = useNavigate()
-  const { login, loading } = useAuth()
-  const message = useMessage()
+  const [form] = Form.useForm();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, googleAuth, loading } = useContext(AuthContext);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  const redirectAfterAuth = (authUser) => {
+    const target =
+      location.state?.from ||
+      (authUser?.role === "admin" ? "/admin/dashboard" : "/");
+    navigate(target, { replace: true });
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setGoogleLoading(true);
+      const result = await signInWithGoogle();
+      const firebaseUser = result.user;
+
+      const nameParts = (firebaseUser.displayName || "").trim().split(" ");
+      const firstName = nameParts[0] || "User";
+      const lastName = nameParts.slice(1).join(" ") || firstName;
+
+      const res = await googleAuth({
+        firstName,
+        lastName,
+        email: firebaseUser.email,
+        profilePhoto: firebaseUser.photoURL,
+        uid: firebaseUser.uid,
+      });
+
+      if (res?.data?.success || res?.success) {
+        message.success(
+          res?.data?.message ||
+          res?.message ||
+          "Signed in with Google successfully!",
+        );
+        redirectAfterAuth(res?.data?.data?.user);
+      } else {
+        message.error(
+          res?.message || res?.data?.message || "Google sign-in failed",
+        );
+      }
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      if (
+        error?.code === "auth/popup-closed-by-user" ||
+        error?.code === "auth/cancelled-popup-request"
+      ) {
+        return;
+      }
+      message.error(error?.message || "Google sign-in failed");
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const onFinish = async (values) => {
-    const res = await login(values)
+    const res = await login(values);
     if (res?.data?.success || res?.success) {
-      message.success(res?.data?.message || res?.message || 'Welcome back! Signed in successfully.')
-      navigate('/')
+      message.success(
+        res?.data?.message ||
+        res?.message ||
+        "Welcome back! Signed in successfully.",
+      );
+      redirectAfterAuth(res?.data?.data?.user);
     } else {
-      message.error(res?.message || res?.data?.message || 'Invalid email or password')
+      message.error(
+        res?.message || res?.data?.message || "Invalid email or password",
+      );
     }
-  }
+  };
 
   return (
     <div className="min-h-screen! w-full! bg-white! flex! flex-col! lg:flex-row! overflow-x-hidden!">
@@ -44,13 +102,18 @@ export default function Login() {
             Curated essentials crafted for effortless modern living.
           </h1>
           <p className="text-white/80! text-xs! sm:text-[13px]! leading-relaxed! m-0!">
-            Join our collective of discerning collectors and design enthusiasts. Access private drops, tailored recommendations, and seamless global checkout.
+            Join our collective of discerning collectors and design enthusiasts.
+            Access private drops, tailored recommendations, and seamless global
+            checkout.
           </p>
         </div>
 
         <div className="relative! z-10! hidden! sm:inline-flex! items-center! gap-2! bg-black/40! backdrop-blur-md! text-white/90! text-[10.5px]! px-3.5! py-1.5! rounded-full! border! border-white/15! w-fit!">
           <GlobalOutlined className="text-xs! text-white/70!" />
-          <span>Featured in Arch Digest &amp; Monocle • Over 40,000 design objects cataloged</span>
+          <span>
+            Featured in Arch Digest &amp; Monocle • Over 40,000 design objects
+            cataloged
+          </span>
         </div>
       </div>
 
@@ -79,7 +142,9 @@ export default function Login() {
 
           <button
             type="button"
-            className="w-full! h-10! sm:h-10.5! rounded-full! bg-white! hover:bg-gray-50! border! border-[#ebebeb]! shadow-2xs! flex! items-center! justify-center! gap-2.5! text-xs! sm:text-[13px]! font-semibold! text-gray-800! transition-all! cursor-pointer!"
+            onClick={handleGoogleSignIn}
+            disabled={googleLoading || loading}
+            className="w-full! h-10! sm:h-10.5! rounded-full! bg-white! hover:bg-gray-50! border! border-[#ebebeb]! shadow-2xs! flex! items-center! justify-center! gap-2.5! text-xs! sm:text-[13px]! font-semibold! text-gray-800! transition-all! cursor-pointer! disabled:opacity-60! disabled:cursor-not-allowed!"
           >
             <svg className="w-3.5! h-3.5!" viewBox="0 0 24 24">
               <path
@@ -99,7 +164,11 @@ export default function Login() {
                 d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
               />
             </svg>
-            <span>Continue with Google</span>
+            <span>
+              {googleLoading
+                ? "Connecting to Google..."
+                : "Continue with Google"}
+            </span>
           </button>
 
           <div className="relative! flex! items-center! justify-center! my-3! sm:my-3.5!">
@@ -124,13 +193,18 @@ export default function Login() {
                 </span>
               }
               rules={[
-                { required: true, message: 'Please enter your email address' },
-                { type: 'email', message: 'Please enter a valid email address' }
+                { required: true, message: "Please enter your email address" },
+                {
+                  type: "email",
+                  message: "Please enter a valid email address",
+                },
               ]}
               className="mb-2!"
             >
               <Input
-                prefix={<MailOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                prefix={
+                  <MailOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
+                }
                 placeholder="name@example.com"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! sm:py-2! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
               />
@@ -144,12 +218,14 @@ export default function Login() {
                 </span>
               }
               rules={[
-                { required: true, message: 'Please enter your password' }
+                { required: true, message: "Please enter your password" },
               ]}
               className="mb-1!"
             >
               <Input.Password
-                prefix={<LockOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />}
+                prefix={
+                  <LockOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
+                }
                 placeholder="Enter your password"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! sm:py-2! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
               />
@@ -178,8 +254,11 @@ export default function Login() {
 
             <div className="text-center! pt-2!">
               <span className="text-xs! text-gray-500!">
-                Don't have an account?{' '}
-                <Link to="/signup" className="text-[#5433eb]! font-semibold! hover:underline! no-underline!">
+                Don't have an account?{" "}
+                <Link
+                  to="/signup"
+                  className="text-[#5433eb]! font-semibold! hover:underline! no-underline!"
+                >
                   Sign up
                 </Link>
               </span>
@@ -188,19 +267,28 @@ export default function Login() {
         </div>
 
         <div className="relative! z-10! flex! items-center! justify-center! gap-3! text-[10.5px]! text-gray-400! pt-1!">
-          <a href="#terms" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+          <a
+            href="#terms"
+            className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+          >
             Terms of Service
           </a>
           <span>•</span>
-          <a href="#privacy" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+          <a
+            href="#privacy"
+            className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+          >
             Privacy Policy
           </a>
           <span>•</span>
-          <a href="#help" className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!">
+          <a
+            href="#help"
+            className="hover:text-gray-600! transition-colors! no-underline! text-gray-400!"
+          >
             Need Help?
           </a>
         </div>
       </div>
     </div>
-  )
+  );
 }
