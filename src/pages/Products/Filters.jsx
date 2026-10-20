@@ -150,11 +150,7 @@ export default function Filters({
                       <span className="text-[12px]! font-bold! uppercase! tracking-wider! text-gray-700! group-hover:text-[#5433eb]! transition-colors!">
                         {sec.title}
                       </span>
-                      {isColActive && (
-                        <span className="text-[9px]! font-bold! px-1.5! py-0.2! rounded-full! bg-[#5433eb]! text-white! uppercase! tracking-normal!">
-                          Active
-                        </span>
-                      )}
+
                     </button>
                     <span className="text-[10px]! font-semibold! text-gray-400!">
                       {secTotalCount} items
