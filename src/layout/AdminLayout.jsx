@@ -1,6 +1,12 @@
-import React, { useState, useContext, useEffect } from "react";
-import { Link, NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
-import { ConfigProvider, Avatar, Button, Input, Dropdown, Drawer } from "antd";
+import React, { useState, useContext, useEffect, useMemo } from "react";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { ConfigProvider, Avatar, Button, Dropdown, Drawer } from "antd";
 import { AuthContext } from "../context/authContext";
 import logo from "../assets/logo/logo.png";
 import {
@@ -10,11 +16,7 @@ import {
   TagsOutlined,
   CreditCardOutlined,
   ShopOutlined,
-  SearchOutlined,
-  CalendarOutlined,
   DownOutlined,
-  BellOutlined,
-  UserOutlined,
   LogoutOutlined,
   MenuOutlined,
   CloseOutlined,
@@ -22,18 +24,13 @@ import {
 
 export default function AdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [dateRange, setDateRange] = useState("Last 30 days");
-  const [searchQuery, setSearchQuery] = useState("");
 
   const { user, logout } = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Close mobile drawer on route change
   useEffect(() => {
     setMobileMenuOpen(false);
-    setNotificationsOpen(false);
   }, [location.pathname]);
 
   const handleLogout = async () => {
@@ -41,7 +38,6 @@ export default function AdminLayout() {
     navigate("/login");
   };
 
-  // Sidebar navigation - Clean icon + label, NO badges, NO separate Add Product tab
   const navItems = [
     {
       to: "/admin",
@@ -71,6 +67,46 @@ export default function AdminLayout() {
     },
   ];
 
+  const breadcrumbs = useMemo(() => {
+    const path = location.pathname;
+    if (path === "/admin" || path === "/admin/dashboard") {
+      return [{ label: "Admin", to: "/admin" }, { label: "Overview" }];
+    }
+    if (path.startsWith("/admin/orders")) {
+      return [
+        { label: "Admin", to: "/admin" },
+        { label: "Orders & Fulfillment" },
+      ];
+    }
+    if (path === "/admin/products/new") {
+      return [
+        { label: "Admin", to: "/admin" },
+        { label: "Products", to: "/admin/products" },
+        { label: "Add Product" },
+      ];
+    }
+    if (path.includes("/admin/products/edit")) {
+      return [
+        { label: "Admin", to: "/admin" },
+        { label: "Products", to: "/admin/products" },
+        { label: "Edit Product" },
+      ];
+    }
+    if (path.startsWith("/admin/products")) {
+      return [{ label: "Admin", to: "/admin" }, { label: "Products Catalog" }];
+    }
+    if (path.startsWith("/admin/categories")) {
+      return [{ label: "Admin", to: "/admin" }, { label: "Categories" }];
+    }
+    if (path.startsWith("/admin/payments")) {
+      return [
+        { label: "Admin", to: "/admin" },
+        { label: "Revenue & Payments" },
+      ];
+    }
+    return [{ label: "Admin", to: "/admin" }, { label: "Portal" }];
+  }, [location.pathname]);
+
   const adminName = user
     ? `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email
     : "Store Admin";
@@ -79,22 +115,18 @@ export default function AdminLayout() {
     ? `${user.firstName[0]}${user.lastName ? user.lastName[0] : ""}`.toUpperCase()
     : "AD";
 
-  const dateMenuItems = [
-    { key: "today", label: "Today", onClick: () => setDateRange("Today") },
-    { key: "7days", label: "Last 7 days", onClick: () => setDateRange("Last 7 days") },
-    { key: "30days", label: "Last 30 days", onClick: () => setDateRange("Last 30 days") },
-    { key: "quarter", label: "This Quarter (Q2)", onClick: () => setDateRange("This Quarter (Q2)") },
-    { key: "all", label: "All Time", onClick: () => setDateRange("All Time") },
-  ];
-
   const profileMenuItems = [
     {
       key: "user-info",
       disabled: true,
       label: (
         <div className="py-1">
-          <p className="text-xs font-bold text-text-primary leading-tight">{adminName}</p>
-          <p className="text-[11px] text-text-secondary leading-tight mt-0.5">{adminEmail}</p>
+          <p className="text-xs font-bold text-text-primary leading-tight">
+            {adminName}
+          </p>
+          <p className="text-[11px] text-text-secondary leading-tight mt-0.5">
+            {adminEmail}
+          </p>
         </div>
       ),
     },
@@ -132,29 +164,17 @@ export default function AdminLayout() {
       }}
     >
       <div className="min-h-screen bg-canvas text-text-primary flex flex-col lg:flex-row font-sans selection:bg-primary/20 selection:text-primary">
-        {/* ========================================================================= */}
-        {/* DESKTOP SIDEBAR (Complete Full Sidebar on Desktop)                        */}
-        {/* ========================================================================= */}
         <aside className="hidden lg:flex lg:flex-col w-64 xl:w-72 bg-surface border-r border-border fixed inset-y-0 left-0 z-40 shadow-level-1">
-          {/* Brand Header */}
-          <div className="h-20 flex items-center justify-between px-6 border-b border-border">
-            <Link to="/admin" className="flex items-center gap-3 group">
+          <div className="h-20 flex items-center px-6 border-b border-border">
+            <Link to="/admin" className="flex items-center group">
               <img
                 src={logo}
                 alt="shop."
                 className="h-7 w-auto object-contain transition-transform group-hover:scale-105"
               />
-              <span className="inline-flex items-center text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                Admin
-              </span>
             </Link>
-            <div
-              className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"
-              title="System Operational"
-            />
           </div>
 
-          {/* Navigation Section */}
           <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
             <div>
               <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
@@ -216,13 +236,16 @@ export default function AdminLayout() {
             </div>
           </div>
 
-          {/* User Profile Card at Sidebar Bottom */}
           <div className="p-4 border-t border-border bg-surface">
             <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-canvas transition-colors">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative flex-shrink-0">
                   {user?.profilePhoto ? (
-                    <Avatar src={user.profilePhoto} size={40} className="ring-2 ring-primary/20" />
+                    <Avatar
+                      src={user.profilePhoto}
+                      size={40}
+                      className="ring-2 ring-primary/20"
+                    />
                   ) : (
                     <Avatar
                       size={40}
@@ -255,9 +278,6 @@ export default function AdminLayout() {
           </div>
         </aside>
 
-        {/* ========================================================================= */}
-        {/* MOBILE HEADER & ANTD DRAWER                                               */}
-        {/* ========================================================================= */}
         <div className="lg:hidden bg-surface border-b border-border sticky top-0 z-50 px-4 py-3 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             <Button
@@ -267,22 +287,37 @@ export default function AdminLayout() {
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open sidebar menu"
             />
-            <Link to="/admin" className="flex items-center gap-2">
-              <img src={logo} alt="shop." className="h-6 w-auto object-contain" />
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                Admin
-              </span>
+            <Link to="/admin" className="flex items-center">
+              <img
+                src={logo}
+                alt="shop."
+                className="h-6 w-auto object-contain"
+              />
             </Link>
           </div>
 
           <div className="flex items-center gap-2">
-            <Avatar size={32} className="bg-primary text-on-primary font-bold text-xs">
-              {adminInitials}
-            </Avatar>
+            <Dropdown menu={{ items: profileMenuItems }} trigger={["click"]}>
+              <button
+                type="button"
+                className="cursor-pointer border-0 bg-transparent p-0 rounded-full flex items-center justify-center focus:outline-none"
+                aria-label="Admin Profile Menu"
+              >
+                {user?.profilePhoto ? (
+                  <Avatar src={user.profilePhoto} size={32} />
+                ) : (
+                  <Avatar
+                    size={32}
+                    className="bg-primary text-on-primary font-bold text-xs"
+                  >
+                    {adminInitials}
+                  </Avatar>
+                )}
+              </button>
+            </Dropdown>
           </div>
         </div>
 
-        {/* Mobile Ant Design Drawer */}
         <Drawer
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
@@ -290,11 +325,8 @@ export default function AdminLayout() {
           width={280}
           closeIcon={<CloseOutlined className="text-text-secondary" />}
           title={
-            <div className="flex items-center gap-2">
+            <div className="flex items-center">
               <img src={logo} alt="shop." className="h-6 w-auto" />
-              <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                Admin
-              </span>
             </div>
           }
         >
@@ -333,11 +365,16 @@ export default function AdminLayout() {
 
             <div className="p-3 border-t border-border bg-canvas rounded-2xl flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Avatar size={34} className="bg-primary text-on-primary font-bold text-xs">
+                <Avatar
+                  size={34}
+                  className="bg-primary text-on-primary font-bold text-xs"
+                >
                   {adminInitials}
                 </Avatar>
                 <div className="leading-tight">
-                  <p className="text-xs font-bold text-text-primary">{adminName}</p>
+                  <p className="text-xs font-bold text-text-primary">
+                    {adminName}
+                  </p>
                   <p className="text-[10px] text-text-secondary">Store Admin</p>
                 </div>
               </div>
@@ -354,99 +391,76 @@ export default function AdminLayout() {
           </div>
         </Drawer>
 
-        {/* ========================================================================= */}
-        {/* MAIN CONTENT AREA                                                         */}
-        {/* ========================================================================= */}
-        <div className="flex-1 lg:ml-64 xl:ml-72 min-h-screen flex flex-col">
-          {/* Top Header Bar (Desktop) */}
+        <div className="flex-1 lg:ml-64 xl:ml-72 min-h-screen flex flex-col min-w-0 overflow-x-hidden">
           <header className="hidden lg:flex items-center justify-between h-20 px-8 bg-surface/90 backdrop-blur-md sticky top-0 z-30 border-b border-border">
-            {/* Search Bar with Ant Design Input */}
-            <div className="relative w-96 max-w-md">
-              <Input
-                placeholder="Search metrics, orders, or reports..."
-                prefix={<SearchOutlined className="text-text-secondary text-sm mr-1.5" />}
-                suffix={
-                  <kbd className="text-[10px] font-semibold text-text-secondary bg-surface border border-border px-1.5 py-0.5 rounded shadow-2xs">
-                    ⌘K
-                  </kbd>
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="rounded-full! py-2! px-4! bg-canvas! hover:bg-[#eae7e7]! focus:bg-surface! border-transparent! focus:border-primary! text-sm!"
+            <div className="flex items-center gap-2 text-xs">
+              <span
+                className="w-2 h-2 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20 mr-1"
+                title="System Operational"
               />
+              {breadcrumbs.map((crumb, idx) => (
+                <React.Fragment key={crumb.label}>
+                  {idx > 0 && (
+                    <span className="text-text-secondary/40 font-normal">
+                      /
+                    </span>
+                  )}
+                  {crumb.to ? (
+                    <Link
+                      to={crumb.to}
+                      className="text-text-secondary hover:text-text-primary transition-colors font-medium"
+                    >
+                      {crumb.label}
+                    </Link>
+                  ) : (
+                    <span className="text-text-primary font-bold">
+                      {crumb.label}
+                    </span>
+                  )}
+                </React.Fragment>
+              ))}
             </div>
 
-            {/* Header Controls (Date range, Notifications, Profile) */}
             <div className="flex items-center gap-3">
-              {/* Date Range Selector Dropdown */}
-              <Dropdown menu={{ items: dateMenuItems }} trigger={["click"]}>
-                <Button
-                  className="rounded-full! text-xs! font-semibold! text-text-primary! bg-canvas! hover:bg-[#eae7e7]! border-transparent! hover:border-border! h-auto! py-2! px-3.5! flex! items-center! gap-2!"
-                >
-                  <CalendarOutlined className="text-text-secondary text-sm" />
-                  <span>{dateRange}</span>
-                  <DownOutlined className="text-text-secondary text-[10px]" />
-                </Button>
-              </Dropdown>
-
-              {/* Notification Bell */}
-              <div className="relative">
+              <Link to="/" target="_blank" rel="noreferrer">
                 <Button
                   type="text"
-                  shape="circle"
-                  icon={<BellOutlined className="text-base text-text-secondary" />}
-                  onClick={() => setNotificationsOpen(!notificationsOpen)}
-                  aria-label="View notifications"
-                  className="bg-canvas! hover:bg-[#eae7e7]! h-9! w-9! relative!"
-                />
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full ring-2 ring-white pointer-events-none" />
-
-                {notificationsOpen && (
-                  <div className="absolute right-0 mt-2 w-80 bg-surface rounded-2xl shadow-xl border border-border p-4 z-50">
-                    <div className="flex items-center justify-between pb-3 border-b border-border">
-                      <span className="text-xs font-bold text-text-primary">Notifications</span>
-                      <span className="text-[10px] text-primary font-semibold cursor-pointer">
-                        Mark all read
-                      </span>
-                    </div>
-                    <div className="py-3 space-y-2.5 text-xs">
-                      <div className="flex gap-2.5 p-2 rounded-xl bg-primary/5">
-                        <span className="w-2 h-2 mt-1 rounded-full bg-primary" />
-                        <div>
-                          <p className="font-semibold text-text-primary">Live Sync Connected</p>
-                          <p className="text-[11px] text-text-secondary">
-                            Store APIs & inventory are active.
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Profile Dropdown */}
-              <Dropdown menu={{ items: profileMenuItems }} trigger={["click"]}>
-                <Button
-                  className="rounded-full! pl-1.5! pr-3! py-1! bg-canvas! hover:bg-[#eae7e7]! border-transparent! hover:border-border! h-auto! flex! items-center! gap-2.5!"
+                  icon={
+                    <ShopOutlined className="text-sm text-text-secondary" />
+                  }
+                  className="rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-text-primary! hover:bg-canvas! h-9! px-3.5! flex! items-center! gap-2! border border-transparent hover:border-border transition-all"
                 >
+                  View Storefront
+                </Button>
+              </Link>
+
+              <Dropdown menu={{ items: profileMenuItems }} trigger={["click"]}>
+                <Button className="rounded-full! pl-1.5! pr-3! py-1! bg-canvas! hover:bg-[#eae7e7]! border border-border! h-auto! flex! items-center! gap-2.5! shadow-2xs!">
                   {user?.profilePhoto ? (
                     <Avatar src={user.profilePhoto} size={28} />
                   ) : (
-                    <Avatar size={28} className="bg-primary text-on-primary font-bold text-xs shadow-xs">
+                    <Avatar
+                      size={28}
+                      className="bg-primary text-on-primary font-bold text-xs shadow-xs"
+                    >
                       {adminInitials}
                     </Avatar>
                   )}
-                  <span className="text-xs font-bold text-text-primary">
-                    {adminName.split(" ")[0]}
-                  </span>
-                  <DownOutlined className="text-text-secondary text-[10px]" />
+                  <div className="flex flex-col text-left">
+                    <span className="text-xs font-bold text-text-primary leading-tight">
+                      {adminName.split(" ")[0]}
+                    </span>
+                    <span className="text-[10px] text-text-secondary leading-tight font-medium">
+                      Admin
+                    </span>
+                  </div>
+                  <DownOutlined className="text-text-secondary text-[10px] ml-0.5" />
                 </Button>
               </Dropdown>
             </div>
           </header>
 
-          {/* Dynamic Nested Page Content */}
-          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto">
+          <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1600px] w-full mx-auto min-w-0">
             <Outlet />
           </main>
         </div>

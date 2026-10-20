@@ -1,348 +1,369 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button, Input, Tag, Progress } from "antd";
+import React, { useState, useEffect } from "react";
+import { Button, Input, Tag, message } from "antd";
 import {
-  ExportOutlined,
   SearchOutlined,
-  ArrowUpOutlined,
-  CalendarOutlined,
   CheckCircleOutlined,
+  CheckCircleFilled,
   ClockCircleOutlined,
-  CloseCircleOutlined,
+  DollarOutlined,
 } from "@ant-design/icons";
+import {
+  getAllPaymentsApi,
+  getRevenueStatsApi,
+  changeCODPaymentStatusApi,
+} from "../../services/paymentService";
+import Loader from "../../components/Loader";
 
 export default function AdminPayments() {
+  const [payments, setPayments] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [updatingId, setUpdatingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
 
-  const payments = [
-    {
-      id: "TXN-8921",
-      orderNumber: "SH-8921",
-      customer: "Alex Morgan",
-      email: "alex.morgan@designstudio.com",
-      avatar: "AM",
-      avatarBg: "bg-[#e4dfff] text-[#3b00d1]",
-      total: "$386.51",
-      paymentMethod: "Apple Pay",
-      channel: "Direct Online",
-      paymentStatus: "PAID",
-      dateTime: "Today, 14:24",
-      gatewayId: "ch_3N82bXFk",
-    },
-    {
-      id: "TXN-8920",
-      orderNumber: "SH-8920",
-      customer: "Elena Rostova",
-      email: "elena.r@archdaily.com",
-      avatar: "ER",
-      avatarBg: "bg-[#f0eded] text-[#1a1a1a]",
-      total: "$145.00",
-      paymentMethod: "Credit Card (Visa)",
-      channel: "Direct Online",
-      paymentStatus: "PAID",
-      dateTime: "Today, 13:08",
-      gatewayId: "ch_3N81vLk9",
-    },
-    {
-      id: "TXN-8919",
-      orderNumber: "SH-8919",
-      customer: "Marcus Vance",
-      email: "m.vance@studio.co",
-      avatar: "MV",
-      avatarBg: "bg-[#ffdbce] text-[#9f3800]",
-      total: "$520.00",
-      paymentMethod: "Cash on Delivery",
-      channel: "Wholesale",
-      paymentStatus: "UNPAID",
-      dateTime: "Today, 11:45",
-      gatewayId: "cod_9921b",
-    },
-    {
-      id: "TXN-8918",
-      orderNumber: "SH-8918",
-      customer: "Sophie Chen",
-      email: "chen.sophie@minimal.io",
-      avatar: "SC",
-      avatarBg: "bg-[#e5e2e1] text-[#474556]",
-      total: "$260.00",
-      paymentMethod: "Credit Card (MC)",
-      channel: "Mobile App",
-      paymentStatus: "PAID",
-      dateTime: "Today, 09:15",
-      gatewayId: "ch_3N79qQa2",
-    },
-    {
-      id: "TXN-8917",
-      orderNumber: "SH-8917",
-      customer: "Julian Thorne",
-      email: "thorne@atelier.org",
-      avatar: "JT",
-      avatarBg: "bg-[#eae7e7] text-[#1a1a1a]",
-      total: "$189.00",
-      paymentMethod: "Apple Pay",
-      channel: "Direct Online",
-      paymentStatus: "REFUNDED",
-      dateTime: "Yesterday, 18:30",
-      gatewayId: "re_8917zA",
-    },
-    {
-      id: "TXN-8916",
-      orderNumber: "SH-8916",
-      customer: "Clara Oswald",
-      email: "clara.o@nordic.co",
-      avatar: "CO",
-      avatarBg: "bg-[#e4dfff] text-[#3b00d1]",
-      total: "$412.80",
-      paymentMethod: "Credit Card (Amex)",
-      channel: "Direct Online",
-      paymentStatus: "PAID",
-      dateTime: "Yesterday, 16:20",
-      gatewayId: "ch_3N64bLm1",
-    },
-  ];
+  const fetchPaymentsData = async () => {
+    try {
+      setLoading(true);
+      const [paymentsRes, statsRes] = await Promise.allSettled([
+        getAllPaymentsApi(),
+        getRevenueStatsApi(),
+      ]);
+
+      if (
+        paymentsRes.status === "fulfilled" &&
+        paymentsRes.value?.data?.success
+      ) {
+        setPayments(paymentsRes.value.data.data?.payments || []);
+      }
+
+      if (statsRes.status === "fulfilled" && statsRes.value?.data?.success) {
+        setStats(statsRes.value.data.data || null);
+      }
+    } catch (err) {
+      console.error("Failed to load admin payments:", err);
+      message.error("Failed to load payments");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateCODPayment = async (orderId, targetStatus) => {
+    try {
+      setUpdatingId(orderId);
+      const res = await changeCODPaymentStatusApi(orderId, targetStatus);
+      if (res?.data?.success) {
+        message.success(
+          res.data.message || `Payment marked as ${targetStatus}`,
+        );
+        setPayments((prev) =>
+          prev.map((p) =>
+            p._id === orderId ? { ...p, paymentStatus: targetStatus } : p,
+          ),
+        );
+        fetchPaymentsData();
+      } else {
+        message.error(res?.data?.message || "Failed to update payment status");
+      }
+    } catch (err) {
+      console.error("Failed to update payment status:", err);
+      message.error(
+        err?.response?.data?.message || "Failed to update payment status",
+      );
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  useEffect(() => {
+    fetchPaymentsData();
+  }, []);
+
+  const totalCollected =
+    stats?.totalRevenue ??
+    payments
+      .filter((p) => p.paymentStatus === "PAID")
+      .reduce((sum, p) => sum + (Number(p.total) || 0), 0);
+
+  const pendingSettlement = payments
+    .filter((p) => p.paymentStatus !== "PAID")
+    .reduce((sum, p) => sum + (Number(p.total) || 0), 0);
 
   const filtered = payments.filter((p) => {
-    if (statusFilter !== "All" && p.paymentStatus !== statusFilter) return false;
+    if (statusFilter !== "All" && p.paymentStatus !== statusFilter)
+      return false;
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      return (
-        p.orderNumber.toLowerCase().includes(q) ||
-        p.customer.toLowerCase().includes(q) ||
-        p.gatewayId.toLowerCase().includes(q)
-      );
+      const customerName =
+        `${p.shippingAddress?.firstName || ""} ${p.shippingAddress?.lastName || ""} ${p.user?.firstName || ""}`.toLowerCase();
+      const orderNum = (p.orderNumber || "").toLowerCase();
+      return orderNum.includes(q) || customerName.includes(q);
     }
     return true;
   });
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
-      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
-              Revenue & Payments
-            </h1>
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-              Settlement Active
-            </span>
-          </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Reconciliation ledger, cash on delivery tracking, and gateway transactions.
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+            Payments &amp; Settlements
+          </h1>
+          <p className="text-xs sm:text-sm text-text-secondary mt-1">
+            Real-time ledger of store revenue, payments received, and pending
+            COD settlements.
           </p>
-        </div>
-
-        <div className="flex items-center gap-2.5">
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-surface rounded-full border border-border text-xs font-semibold text-text-primary shadow-2xs">
-            <CalendarOutlined className="text-text-secondary" />
-            <span>Fiscal Month: May 2025</span>
-          </div>
-
-          <Button
-            icon={<ExportOutlined className="text-text-secondary" />}
-            className="rounded-full! text-xs! font-semibold! text-text-primary! bg-surface! hover:bg-canvas! border-border! h-auto! py-2! px-4!"
-          >
-            Export Ledger
-          </Button>
         </div>
       </div>
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary uppercase">
-              Settled Revenue
+            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+              TOTAL COLLECTED
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              <ArrowUpOutlined className="text-[10px]" />
-              +12.4%
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+              <CheckCircleFilled className="text-[9px]" /> Verified
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-primary mt-2">
-            $128,430.00
-          </h2>
-          <p className="text-xs text-text-secondary mt-1 font-medium">
-            Realized settled payments
-          </p>
-          <div className="mt-4">
-            <Progress percent={72} showInfo={false} strokeColor="#5433eb" size={["100%", 4]} />
+          <div className="mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              ${Number(totalCollected).toFixed(2)}
+            </h2>
+            <p className="text-xs text-text-secondary mt-1 font-medium">
+              Gross fulfilled order settlements
+            </p>
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary uppercase">
-              Pending Settlements (COD / Hold)
+            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+              PENDING SETTLEMENT
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-              12 orders
+              <ClockCircleOutlined className="text-[9px]" /> In Flow
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-2">
-            $4,320.00
-          </h2>
-          <p className="text-xs text-text-secondary mt-1 font-medium">
-            Awaiting carrier delivery proof
-          </p>
-          <div className="mt-4">
-            <Progress percent={35} showInfo={false} strokeColor="#f59e0b" size={["100%", 4]} />
+          <div className="mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              ${Number(pendingSettlement).toFixed(2)}
+            </h2>
+            <p className="text-xs text-text-secondary mt-1 font-medium">
+              Cash due upon courier arrival
+            </p>
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-text-secondary uppercase">
-              Disputed / Refunded
+            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+              TOTAL TRANSACTIONS
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-canvas text-text-secondary">
-              0.14% rate
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              Live
             </span>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary mt-2">
-            $189.00
-          </h2>
-          <p className="text-xs text-text-secondary mt-1 font-medium">
-            1 returned item in cycle
-          </p>
-          <div className="mt-4">
-            <Progress percent={8} showInfo={false} strokeColor="#6b7280" size={["100%", 4]} />
+          <div className="mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              {payments.length}
+            </h2>
+            <p className="text-xs text-text-secondary mt-1 font-medium">
+              Total customer orders processed
+            </p>
+          </div>
+        </div>
+
+        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+              PAID RATIO
+            </span>
+            <span className="text-xs font-bold text-text-secondary">
+              {payments.length > 0
+                ? `${Math.round(
+                  (payments.filter((p) => p.paymentStatus === "PAID").length /
+                    payments.length) *
+                  100,
+                )}%`
+                : "100%"}
+            </span>
+          </div>
+          <div className="mt-3">
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+              {payments.filter((p) => p.paymentStatus === "PAID").length} /{" "}
+              {payments.length}
+            </h2>
+            <p className="text-xs text-text-secondary mt-1 font-medium">
+              Orders fully settled
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Ledger Table */}
-      <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-sm">
             <Input
-              placeholder="Search transaction, order, or customer..."
-              prefix={<SearchOutlined className="text-text-secondary text-sm mr-1.5" />}
+              placeholder="Search by order number or customer..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="rounded-full! py-2! px-4! bg-canvas! hover:bg-[#eae7e7]! focus:bg-surface! border-transparent! focus:border-primary! text-xs!"
+              prefix={
+                <SearchOutlined className="text-text-secondary text-sm mr-1.5" />
+              }
+              className="rounded-full! py-2! px-3.5! bg-canvas! hover:bg-[#eae7e7]! focus:bg-surface! border-transparent! focus:border-primary! text-xs!"
             />
           </div>
 
-          {/* Active cell tab filter - when clicked becomes active with a bg cell */}
-          <div className="flex items-center gap-1 bg-canvas p-1 rounded-full text-xs font-semibold">
-            {["All", "PAID", "UNPAID", "REFUNDED"].map((tab) => {
-              const isActive = statusFilter === tab;
-              return (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setStatusFilter(tab)}
-                  className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer border-0 ${
-                    isActive
-                      ? "bg-[#f0eded]! text-text-primary! font-bold! shadow-2xs!"
-                      : "text-text-secondary hover:text-text-primary bg-transparent"
+          <div className="flex items-center gap-2 overflow-x-auto">
+            {["All", "PAID", "UNPAID"].map((status) => (
+              <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-all ${statusFilter === status
+                    ? "bg-[#1a1a1a] text-white border-transparent"
+                    : "bg-surface text-text-secondary border-border hover:bg-canvas"
                   }`}
-                >
-                  {tab}
-                </button>
-              );
-            })}
+              >
+                {status === "All" ? "All Payments" : status}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse text-xs">
-            <thead>
-              <tr className="border-b border-border text-text-secondary text-[10px] uppercase font-bold tracking-wider">
-                <th className="py-3 px-3">TRANSACTION</th>
-                <th className="py-3 px-3">ORDER</th>
-                <th className="py-3 px-3">CUSTOMER</th>
-                <th className="py-3 px-3">METHOD</th>
-                <th className="py-3 px-3">DATE</th>
-                <th className="py-3 px-3">AMOUNT</th>
-                <th className="py-3 px-3 text-right">STATUS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/70">
-              {filtered.map((item) => (
-                <tr key={item.id} className="hover:bg-canvas/50 transition-colors">
-                  <td className="py-3.5 px-3 font-mono text-[11px] text-text-secondary">
-                    {item.gatewayId}
-                  </td>
-                  <td className="py-3.5 px-3 font-bold text-primary">
-                    <Link to="/admin/orders" className="hover:underline">
-                      #{item.orderNumber}
-                    </Link>
-                  </td>
-                  <td className="py-3.5 px-3">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={`w-6 h-6 rounded-full font-bold text-[10px] flex items-center justify-center shrink-0 border border-border ${item.avatarBg}`}
-                      >
-                        {item.avatar}
-                      </div>
-                      <div className="min-w-0">
-                        <p className="font-semibold text-text-primary truncate">{item.customer}</p>
-                        <p className="text-[10px] text-text-secondary truncate">{item.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-3.5 px-3 text-text-secondary">
-                    <Tag className="rounded-full! px-2.5! py-0.5! font-bold! text-[10px]! border-border! bg-canvas! text-text-primary! m-0!">
-                      {item.paymentMethod}
-                    </Tag>
-                  </td>
-                  <td className="py-3.5 px-3 text-text-secondary font-medium">
-                    {item.dateTime}
-                  </td>
-                  <td className="py-3.5 px-3 font-extrabold text-text-primary text-sm">
-                    {item.total}
-                  </td>
-                  <td className="py-3.5 px-3 text-right">
-                    <Tag
-                      className="rounded-full! px-2.5! py-1! text-xs! font-bold! border-0! m-0! inline-flex! items-center! gap-1.5!"
-                      style={{
-                        backgroundColor:
-                          item.paymentStatus === "PAID"
-                            ? "rgba(84, 51, 235, 0.1)"
-                            : item.paymentStatus === "UNPAID"
-                            ? "#fffbeb"
-                            : "#fef2f2",
-                        color:
-                          item.paymentStatus === "PAID"
-                            ? "#5433eb"
-                            : item.paymentStatus === "UNPAID"
-                            ? "#b45309"
-                            : "#b91c1c",
-                      }}
-                    >
-                      {item.paymentStatus === "PAID" && <CheckCircleOutlined className="text-[11px]" />}
-                      {item.paymentStatus === "UNPAID" && <ClockCircleOutlined className="text-[11px]" />}
-                      {item.paymentStatus === "REFUNDED" && <CloseCircleOutlined className="text-[11px]" />}
-                      <span>{item.paymentStatus}</span>
-                    </Tag>
-                  </td>
+          {loading ? (
+            <Loader
+              text="Loading ledger records..."
+              subtext="Syncing settled transactions and pending payouts..."
+              className="py-12"
+            />
+          ) : filtered.length === 0 ? (
+            <div className="py-12 text-center text-text-secondary">
+              <DollarOutlined className="text-3xl text-text-secondary mb-2" />
+              <p className="text-xs">No payment records found.</p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="border-b border-border text-text-secondary text-[10px] uppercase tracking-wider font-bold">
+                  <th className="py-3 px-3">Order Number</th>
+                  <th className="py-3 px-3">Date</th>
+                  <th className="py-3 px-3">Customer</th>
+                  <th className="py-3 px-3">Method</th>
+                  <th className="py-3 px-3">Status</th>
+                  <th className="py-3 px-3 text-right">Amount</th>
+                  <th className="py-3 px-3 text-right">Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {filtered.map((p) => {
+                  const customerName =
+                    `${p.shippingAddress?.firstName || ""} ${p.shippingAddress?.lastName || ""}`.trim() ||
+                    p.user?.firstName ||
+                    "Customer";
+                  const isPaid = p.paymentStatus === "PAID";
+                  const isCOD = p.paymentMethod === "COD";
+                  const isCancelled = p.orderStatus === "CANCELLED";
+                  const formattedDate = p.createdAt
+                    ? new Date(p.createdAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
+                    : "Recent";
 
-        {/* Footer */}
-        <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-xs text-text-secondary">
-          <div>Showing {filtered.length} of {payments.length} transactions</div>
-          <div className="flex items-center gap-2">
-            <Button
-              size="small"
-              className="rounded-lg! border-border! bg-surface! text-text-primary! font-semibold! hover:bg-canvas!"
-            >
-              Previous
-            </Button>
-            <Button
-              size="small"
-              className="rounded-lg! border-border! bg-surface! text-text-primary! font-semibold! hover:bg-canvas!"
-            >
-              Next
-            </Button>
-          </div>
+                  return (
+                    <tr
+                      key={p._id}
+                      className="hover:bg-canvas transition-colors"
+                    >
+                      <td className="py-3.5 px-3 font-bold text-primary">
+                        #{p.orderNumber}
+                      </td>
+                      <td className="py-3.5 px-3 text-text-secondary whitespace-nowrap">
+                        {formattedDate}
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <span className="font-bold text-text-primary block">
+                          {customerName}
+                        </span>
+                        <span className="text-[10px] text-text-secondary">
+                          {p.contactInfo?.email || p.user?.email || "No email"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3 text-text-secondary">
+                        <span className="font-semibold text-text-primary">
+                          {p.paymentMethod === "CARD"
+                            ? "Card Online"
+                            : "Cash on Delivery (COD)"}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-3">
+                        <Tag
+                          className={`rounded-full! px-2.5! py-0.5! text-[10px] font-bold! border-0! m-0! ${isPaid
+                              ? "bg-emerald-50! text-emerald-700!"
+                              : "bg-amber-50! text-amber-700!"
+                            }`}
+                        >
+                          {isPaid ? "PAID" : "PENDING (COD)"}
+                        </Tag>
+                      </td>
+                      <td className="py-3.5 px-3 text-right font-extrabold text-text-primary">
+                        ${Number(p.total || 0).toFixed(2)}
+                      </td>
+                      <td className="py-3.5 px-3 text-right">
+                        {isCOD ? (
+                          isCancelled ? (
+                            <span className="text-[11px] text-text-secondary italic">
+                              Cancelled
+                            </span>
+                          ) : !isPaid ? (
+                            <Button
+                              size="small"
+                              type="primary"
+                              loading={updatingId === p._id}
+                              onClick={() =>
+                                handleUpdateCODPayment(p._id, "PAID")
+                              }
+                              icon={<CheckCircleOutlined />}
+                              className="rounded-full! text-[11px]! font-bold! h-auto! py-1! px-3! bg-emerald-600! hover:bg-emerald-700! text-white! border-0! shadow-xs!"
+                            >
+                              Mark Paid
+                            </Button>
+                          ) : (
+                            <div className="flex items-center justify-end gap-1.5">
+                              <span className="text-[11px] text-emerald-700 font-semibold inline-flex items-center gap-1">
+                                <CheckCircleFilled className="text-emerald-500" />{" "}
+                                Settled
+                              </span>
+                              <button
+                                type="button"
+                                disabled={updatingId === p._id}
+                                onClick={() =>
+                                  handleUpdateCODPayment(p._id, "UNPAID")
+                                }
+                                className="text-[10px] text-text-secondary hover:text-amber-600 underline ml-2 transition-colors cursor-pointer"
+                                title="Revert back to Unpaid"
+                              >
+                                Revert
+                              </button>
+                            </div>
+                          )
+                        ) : (
+                          <span className="text-[11px] text-text-secondary inline-flex items-center gap-1">
+                            <CheckCircleFilled className="text-emerald-500" />{" "}
+                            Auto-settled
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

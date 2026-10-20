@@ -1,32 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import {
-  Button,
-  Input,
-  Select,
-  Tag,
-  Modal,
-  Popconfirm,
-  message,
-  Tooltip,
-  Badge,
-  Progress,
-  Divider,
-} from "antd";
+import { Button, Input, message, Progress } from "antd";
 import {
   TagsOutlined,
   PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
   SearchOutlined,
   ReloadOutlined,
   FolderAddOutlined,
   CheckCircleOutlined,
-  AppstoreOutlined,
   ArrowRightOutlined,
   ThunderboltOutlined,
   LinkOutlined,
-  ShoppingOutlined,
   ManOutlined,
   WomanOutlined,
   SmileOutlined,
@@ -36,9 +20,8 @@ import {
 import {
   getCategoriesApi,
   createCategoryApi,
-  editCategoryApi,
-  deleteCategoryApi,
 } from "../../services/adminService";
+import Loader from "../../components/Loader";
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
@@ -46,19 +29,9 @@ export default function AdminCategories() {
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [collectionFilter, setCollectionFilter] = useState("all");
-
-  // Form State for Creating Category
   const [name, setName] = useState("");
   const [categoryCollection, setCategoryCollection] = useState("men");
 
-  // State for Editing Category
-  const [editModalOpen, setEditModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editCollection, setEditCollection] = useState("men");
-  const [editSubmitting, setEditSubmitting] = useState(false);
-
-  // Popular category suggestion presets for quick creation
   const presets = [
     { name: "Graphic T-Shirts", collection: "men" },
     { name: "Oversized Hoodies", collection: "men" },
@@ -72,7 +45,6 @@ export default function AdminCategories() {
     { name: "Leather Accessories", collection: "women" },
   ];
 
-  // Fetch Categories on mount
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -85,7 +57,8 @@ export default function AdminCategories() {
     } catch (error) {
       console.error(error);
       message.error(
-        error.response?.data?.message || "Unable to retrieve categories from server."
+        error.response?.data?.message ||
+        "Unable to retrieve categories from server.",
       );
     } finally {
       setLoading(false);
@@ -96,7 +69,6 @@ export default function AdminCategories() {
     fetchCategories();
   }, []);
 
-  // Compute live slug preview from name
   const computeSlug = (input) => {
     if (!input) return "";
     return input
@@ -108,9 +80,7 @@ export default function AdminCategories() {
   };
 
   const previewSlug = computeSlug(name);
-  const editPreviewSlug = computeSlug(editName);
 
-  // Handle Create Category Submission
   const handleCreateCategory = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
 
@@ -136,7 +106,6 @@ export default function AdminCategories() {
       if (res?.data?.success) {
         message.success(res.data.message || "Category created successfully!");
         setName("");
-        // Re-fetch to get complete persisted record
         await fetchCategories();
       }
     } catch (error) {
@@ -150,76 +119,11 @@ export default function AdminCategories() {
     }
   };
 
-  // Open Edit Modal
-  const openEditModal = (category) => {
-    setEditingCategory(category);
-    setEditName(category.name || "");
-    setEditCollection(category.categoryCollection || "men");
-    setEditModalOpen(true);
-  };
-
-  // Submit Category Update
-  const handleUpdateCategory = async () => {
-    if (!editingCategory) return;
-    const trimmed = editName.trim();
-    if (!trimmed) {
-      message.warning("Category name cannot be empty.");
-      return;
-    }
-
-    setEditSubmitting(true);
-    try {
-      const res = await editCategoryApi(editingCategory._id, {
-        name: trimmed,
-        categoryCollection: editCollection,
-      });
-
-      if (res?.data?.success) {
-        message.success(res.data.message || "Category updated successfully!");
-        setEditModalOpen(false);
-        setEditingCategory(null);
-        await fetchCategories();
-      }
-    } catch (error) {
-      console.error("Error updating category:", error);
-      message.error(
-        error.response?.data?.message || "Failed to update category."
-      );
-    } finally {
-      setEditSubmitting(false);
-    }
-  };
-
-  // Handle Category Deletion
-  const handleDeleteCategory = async (id) => {
-    try {
-      const res = await deleteCategoryApi(id);
-      if (res?.data?.success) {
-        message.success(res.data.message || "Category removed successfully.");
-        setCategories((prev) => prev.filter((cat) => cat._id !== id));
-      }
-    } catch (error) {
-      console.error("Error deleting category:", error);
-      message.error(
-        error.response?.data?.message ||
-          "Cannot delete category. Ensure no products are currently assigned to it."
-      );
-    }
-  };
-
-  // Copy slug to clipboard helper
-  const copySlug = (slugText) => {
-    navigator.clipboard.writeText(slugText);
-    message.info(`Slug "${slugText}" copied to clipboard`);
-  };
-
-  // Quick preset apply
   const handleApplyPreset = (preset) => {
     setName(preset.name);
     setCategoryCollection(preset.collection);
   };
 
-  // Filter Categories by search and collection
   const filteredCategories = categories.filter((cat) => {
     const matchesCollection =
       collectionFilter === "all" || cat.categoryCollection === collectionFilter;
@@ -232,38 +136,43 @@ export default function AdminCategories() {
     return matchesCollection && matchesQuery;
   });
 
-  // Calculate Metrics
   const totalCount = categories.length;
-  const menCount = categories.filter((c) => c.categoryCollection === "men").length;
-  const womenCount = categories.filter((c) => c.categoryCollection === "women").length;
-  const kidsCount = categories.filter((c) => c.categoryCollection === "kids").length;
+  const menCount = categories.filter(
+    (c) => c.categoryCollection === "men",
+  ).length;
+  const womenCount = categories.filter(
+    (c) => c.categoryCollection === "women",
+  ).length;
+  const kidsCount = categories.filter(
+    (c) => c.categoryCollection === "kids",
+  ).length;
 
   const getCollectionBadge = (col) => {
     switch (col) {
       case "men":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 shrink-0 whitespace-nowrap">
             <ManOutlined className="text-indigo-600" />
             Men's Collection
           </span>
         );
       case "women":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-pink-50 text-pink-700 border border-pink-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-pink-50 text-pink-700 border border-pink-200 shrink-0 whitespace-nowrap">
             <WomanOutlined className="text-pink-600" />
             Women's Collection
           </span>
         );
       case "kids":
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 shrink-0 whitespace-nowrap">
             <SmileOutlined className="text-amber-600" />
             Kids' Collection
           </span>
         );
       default:
         return (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 shrink-0 whitespace-nowrap">
             {col}
           </span>
         );
@@ -272,17 +181,24 @@ export default function AdminCategories() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
-      {/* ========================================================================= */}
-      {/* 1. TOP HEADER BANNER & BREADCRUMBS                                        */}
-      {/* ========================================================================= */}
+      {submitting && (
+        <Loader
+          fullscreen
+          text="Creating Category..."
+          subtext="Syncing taxonomy and storefront tags in real-time..."
+        />
+      )}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary">
+          <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary flex-wrap">
             <Link to="/admin" className="hover:text-primary transition-colors">
               Admin
             </Link>
             <span>&gt;</span>
-            <Link to="/admin/products" className="hover:text-primary transition-colors">
+            <Link
+              to="/admin/products"
+              className="hover:text-primary transition-colors"
+            >
               Catalog
             </Link>
             <span>&gt;</span>
@@ -292,12 +208,14 @@ export default function AdminCategories() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
               Category Management
             </h1>
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
               Taxonomy & Tags
             </span>
           </div>
           <p className="text-xs text-text-secondary mt-1 max-w-2xl">
-            Create, structure, and curate product classifications across Men's, Women's, and Kids' departments with automatic URL slugs and storefront synchronization.
+            Create, structure, and curate product classifications across Men's,
+            Women's, and Kids' departments with automatic URL slugs and
+            storefront synchronization.
           </p>
         </div>
 
@@ -323,11 +241,7 @@ export default function AdminCategories() {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 2. STAT / METRIC CARDS                                                    */}
-      {/* ========================================================================= */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        {/* Total Categories */}
         <div className="bg-surface rounded-card p-5 border border-border shadow-level-1 hover:border-primary/40 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
@@ -344,11 +258,15 @@ export default function AdminCategories() {
             Active catalog classifications
           </p>
           <div className="mt-3">
-            <Progress percent={100} showInfo={false} strokeColor="#5433eb" size={["100%", 4]} />
+            <Progress
+              percent={100}
+              showInfo={false}
+              strokeColor="#5433eb"
+              size={["100%", 4]}
+            />
           </div>
         </div>
 
-        {/* Men's Collection */}
         <div className="bg-surface rounded-card p-5 border border-border shadow-level-1 hover:border-indigo-300 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
@@ -362,11 +280,14 @@ export default function AdminCategories() {
             {menCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
-            {totalCount ? Math.round((menCount / totalCount) * 100) : 0}% of all categories
+            {totalCount ? Math.round((menCount / totalCount) * 100) : 0}% of all
+            categories
           </p>
           <div className="mt-3">
             <Progress
-              percent={totalCount ? Math.round((menCount / totalCount) * 100) : 0}
+              percent={
+                totalCount ? Math.round((menCount / totalCount) * 100) : 0
+              }
               showInfo={false}
               strokeColor="#4f46e5"
               size={["100%", 4]}
@@ -374,7 +295,6 @@ export default function AdminCategories() {
           </div>
         </div>
 
-        {/* Women's Collection */}
         <div className="bg-surface rounded-card p-5 border border-border shadow-level-1 hover:border-pink-300 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
@@ -388,11 +308,14 @@ export default function AdminCategories() {
             {womenCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
-            {totalCount ? Math.round((womenCount / totalCount) * 100) : 0}% of all categories
+            {totalCount ? Math.round((womenCount / totalCount) * 100) : 0}% of
+            all categories
           </p>
           <div className="mt-3">
             <Progress
-              percent={totalCount ? Math.round((womenCount / totalCount) * 100) : 0}
+              percent={
+                totalCount ? Math.round((womenCount / totalCount) * 100) : 0
+              }
               showInfo={false}
               strokeColor="#ec4899"
               size={["100%", 4]}
@@ -400,7 +323,6 @@ export default function AdminCategories() {
           </div>
         </div>
 
-        {/* Kids' Collection */}
         <div className="bg-surface rounded-card p-5 border border-border shadow-level-1 hover:border-amber-300 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
@@ -414,11 +336,14 @@ export default function AdminCategories() {
             {kidsCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
-            {totalCount ? Math.round((kidsCount / totalCount) * 100) : 0}% of all categories
+            {totalCount ? Math.round((kidsCount / totalCount) * 100) : 0}% of
+            all categories
           </p>
           <div className="mt-3">
             <Progress
-              percent={totalCount ? Math.round((kidsCount / totalCount) * 100) : 0}
+              percent={
+                totalCount ? Math.round((kidsCount / totalCount) * 100) : 0
+              }
               showInfo={false}
               strokeColor="#f59e0b"
               size={["100%", 4]}
@@ -427,36 +352,29 @@ export default function AdminCategories() {
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. MAIN WORKSPACE: CREATE CATEGORY FORM + EXISTING CATEGORIES LIST         */}
-      {/* ========================================================================= */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start">
-        {/* ===================================================================== */}
-        {/* LEFT COLUMN: CREATE CATEGORY FORM & PREVIEW (5 cols)                  */}
-        {/* ===================================================================== */}
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-6 sticky top-24">
-            <div className="flex items-center justify-between pb-3 border-b border-border">
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-base">
+            <div className="flex items-center justify-between gap-3 pb-3 border-b border-border">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-base shrink-0">
                   <FolderAddOutlined />
                 </div>
-                <div>
-                  <h2 className="text-base font-bold text-text-primary leading-tight">
+                <div className="min-w-0">
+                  <h2 className="text-base font-bold text-text-primary leading-tight truncate">
                     Create New Category
                   </h2>
-                  <p className="text-[11px] text-text-secondary">
+                  <p className="text-[11px] text-text-secondary truncate">
                     Add new taxonomy label to your catalog
                   </p>
                 </div>
               </div>
-              <span className="text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+              <span className="shrink-0 whitespace-nowrap text-[11px] font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-full">
                 Live Sync
               </span>
             </div>
 
             <form onSubmit={handleCreateCategory} className="space-y-5">
-              {/* Category Name Input */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
@@ -472,125 +390,125 @@ export default function AdminCategories() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   className="py-2.5! px-4! bg-canvas! focus:bg-surface! text-sm! font-semibold! text-text-primary! rounded-2xl! border-border! focus:border-primary!"
-                  prefix={<TagsOutlined className="text-text-secondary mr-1 text-sm" />}
+                  prefix={
+                    <TagsOutlined className="text-text-secondary mr-1 text-sm" />
+                  }
                   maxLength={60}
                 />
               </div>
 
-              {/* Real-time Slug Preview */}
               <div className="p-3.5 rounded-2xl bg-canvas border border-border space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1">
-                    <LinkOutlined className="text-primary" /> Auto-Generated Slug
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1 shrink-0 whitespace-nowrap">
+                    Auto-Generated Slug
                   </span>
-                  {previewSlug && (
-                    <button
-                      type="button"
-                      onClick={() => copySlug(previewSlug)}
-                      className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 cursor-pointer"
-                    >
-                      <CopyOutlined /> Copy
-                    </button>
-                  )}
                 </div>
-                <div className="font-mono text-xs text-text-primary break-all bg-surface px-3 py-1.5 rounded-xl border border-border flex items-center justify-between">
-                  <span className={previewSlug ? "text-primary font-bold" : "text-text-secondary"}>
-                    {previewSlug ? `/catalog/${previewSlug}` : "slug will appear here..."}
+                <div className="font-mono text-xs text-text-primary break-all bg-surface px-3 py-1.5 rounded-xl border border-border flex items-center justify-between gap-2">
+                  <span
+                    className={`truncate ${previewSlug ? "text-primary font-bold" : "text-text-secondary"}`}
+                  >
+                    {previewSlug
+                      ? `/products/${previewSlug}`
+                      : "slug will appear here..."}
                   </span>
                   {previewSlug && (
-                    <CheckCircleOutlined className="text-emerald-500 text-xs ml-2" />
+                    <CheckCircleOutlined className="text-emerald-500 text-xs shrink-0" />
                   )}
                 </div>
               </div>
 
-              {/* Collection Selection (Men, Women, Kids) */}
               <div>
                 <div className="flex items-center justify-between mb-2.5">
                   <label className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
                     Target Department <span className="text-red-500">*</span>
                   </label>
-                  <span className="text-[10px] text-text-secondary">Select primary collection</span>
+                  <span className="text-[10px] text-text-secondary">
+                    Select primary collection
+                  </span>
                 </div>
 
                 <div className="grid grid-cols-3 gap-2.5">
-                  {/* Men */}
                   <button
                     type="button"
                     onClick={() => setCategoryCollection("men")}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
-                      categoryCollection === "men"
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${categoryCollection === "men"
                         ? "bg-indigo-50/80 border-indigo-400 ring-2 ring-indigo-400/20 text-indigo-900"
                         : "bg-canvas border-border text-text-secondary hover:bg-surface hover:text-text-primary"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${
-                        categoryCollection === "men"
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${categoryCollection === "men"
                           ? "bg-indigo-600 text-white shadow-xs"
                           : "bg-surface text-text-secondary border border-border"
-                      }`}
+                        }`}
                     >
                       <ManOutlined />
                     </div>
                     <span className="text-xs font-bold leading-tight">Men</span>
-                    <span className="text-[10px] opacity-75 mt-0.5">Apparel</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">
+                      Apparel
+                    </span>
                   </button>
 
-                  {/* Women */}
                   <button
                     type="button"
                     onClick={() => setCategoryCollection("women")}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
-                      categoryCollection === "women"
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${categoryCollection === "women"
                         ? "bg-pink-50/80 border-pink-400 ring-2 ring-pink-400/20 text-pink-900"
                         : "bg-canvas border-border text-text-secondary hover:bg-surface hover:text-text-primary"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${
-                        categoryCollection === "women"
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${categoryCollection === "women"
                           ? "bg-pink-600 text-white shadow-xs"
                           : "bg-surface text-text-secondary border border-border"
-                      }`}
+                        }`}
                     >
                       <WomanOutlined />
                     </div>
-                    <span className="text-xs font-bold leading-tight">Women</span>
-                    <span className="text-[10px] opacity-75 mt-0.5">Fashion</span>
+                    <span className="text-xs font-bold leading-tight">
+                      Women
+                    </span>
+                    <span className="text-[10px] opacity-75 mt-0.5">
+                      Fashion
+                    </span>
                   </button>
 
-                  {/* Kids */}
                   <button
                     type="button"
                     onClick={() => setCategoryCollection("kids")}
-                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${
-                      categoryCollection === "kids"
+                    className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all text-center cursor-pointer ${categoryCollection === "kids"
                         ? "bg-amber-50/80 border-amber-400 ring-2 ring-amber-400/20 text-amber-900"
                         : "bg-canvas border-border text-text-secondary hover:bg-surface hover:text-text-primary"
-                    }`}
+                      }`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${
-                        categoryCollection === "kids"
+                      className={`w-7 h-7 rounded-xl flex items-center justify-center text-sm mb-1.5 ${categoryCollection === "kids"
                           ? "bg-amber-600 text-white shadow-xs"
                           : "bg-surface text-text-secondary border border-border"
-                      }`}
+                        }`}
                     >
                       <SmileOutlined />
                     </div>
-                    <span className="text-xs font-bold leading-tight">Kids</span>
-                    <span className="text-[10px] opacity-75 mt-0.5">Junior</span>
+                    <span className="text-xs font-bold leading-tight">
+                      Kids
+                    </span>
+                    <span className="text-[10px] opacity-75 mt-0.5">
+                      Junior
+                    </span>
                   </button>
                 </div>
               </div>
 
-              {/* Quick Presets Section */}
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-wider text-text-secondary flex items-center gap-1">
-                    <ThunderboltOutlined className="text-amber-500" /> Quick Presets
+                    <ThunderboltOutlined className="text-amber-500" /> Quick
+                    Presets
                   </span>
-                  <span className="text-[10px] text-text-secondary">Click to auto-populate</span>
+                  <span className="text-[10px] text-text-secondary">
+                    Click to auto-populate
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
                   {presets.slice(0, 6).map((preset, idx) => (
@@ -598,7 +516,7 @@ export default function AdminCategories() {
                       key={idx}
                       type="button"
                       onClick={() => handleApplyPreset(preset)}
-                      className="px-2.5 py-1 rounded-xl bg-canvas hover:bg-[#eae7e7] text-text-primary border border-border text-[11px] font-medium transition-colors cursor-pointer"
+                      className="px-2.5 py-1 rounded-xl bg-canvas hover:bg-[#eae7e7] text-text-primary border border-border text-[11px] font-medium transition-colors cursor-pointer whitespace-nowrap"
                     >
                       + {preset.name}
                     </button>
@@ -606,33 +524,35 @@ export default function AdminCategories() {
                 </div>
               </div>
 
-              {/* Live Storefront Card Preview */}
-              <div className="p-4 rounded-2xl bg-canvas border border-border space-y-2">
-                <div className="flex items-center justify-between text-[11px] font-bold text-text-secondary">
-                  <span>Storefront Tag Preview</span>
-                  <span className="text-emerald-600 font-bold flex items-center gap-1">
+              <div className="p-4 rounded-2xl bg-canvas border border-border space-y-2.5">
+                <div className="flex items-center justify-between gap-2 text-[11px] font-bold text-text-secondary">
+                  <span className="whitespace-nowrap">
+                    Storefront Tag Preview
+                  </span>
+                  <span className="text-emerald-600 font-bold flex items-center gap-1 shrink-0 whitespace-nowrap">
                     <CheckCircleOutlined /> Live Output
                   </span>
                 </div>
-                <div className="p-3 bg-surface rounded-xl border border-border flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                <div className="p-3 bg-surface rounded-xl border border-border flex items-center justify-between gap-3 min-w-0">
+                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                    <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
                       {name ? name[0].toUpperCase() : "C"}
                     </div>
-                    <div>
-                      <p className="text-xs font-bold text-text-primary">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-text-primary truncate">
                         {name.trim() || "Sample Category Name"}
                       </p>
-                      <p className="text-[10px] text-text-secondary">
-                        slug: /{previewSlug || "sample-category-slug"}
+                      <p className="text-[10px] text-text-secondary truncate font-mono">
+                        slug: /products/{previewSlug || "sample-category-slug"}
                       </p>
                     </div>
                   </div>
-                  <div>{getCollectionBadge(categoryCollection)}</div>
+                  <div className="shrink-0">
+                    {getCollectionBadge(categoryCollection)}
+                  </div>
                 </div>
               </div>
 
-              {/* Form Action Buttons */}
               <div className="pt-2 flex items-center gap-3">
                 <Button
                   type="button"
@@ -659,30 +579,29 @@ export default function AdminCategories() {
           </div>
         </div>
 
-        {/* ===================================================================== */}
-        {/* RIGHT COLUMN: EXISTING CATEGORIES CATALOG (7 cols)                    */}
-        {/* ===================================================================== */}
         <div className="lg:col-span-7 space-y-5">
           <div className="bg-surface rounded-card p-6 border border-border shadow-level-1 space-y-5">
-            {/* Catalog Top Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-text-primary">Existing Categories</h2>
-                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  <h2 className="text-base font-bold text-text-primary whitespace-nowrap">
+                    Existing Categories
+                  </h2>
+                  <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap">
                     {filteredCategories.length} / {categories.length}
                   </span>
                 </div>
                 <p className="text-xs text-text-secondary mt-0.5">
-                  Browse, search, edit, or delete existing categories
+                  Browse or search
                 </p>
               </div>
 
-              {/* Search Bar */}
               <div className="relative w-full sm:w-64">
                 <Input
                   placeholder="Search name, slug..."
-                  prefix={<SearchOutlined className="text-text-secondary text-sm mr-1.5" />}
+                  prefix={
+                    <SearchOutlined className="text-text-secondary text-sm mr-1.5" />
+                  }
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   allowClear
@@ -691,7 +610,6 @@ export default function AdminCategories() {
               </div>
             </div>
 
-            {/* Department Filter Tabs */}
             <div className="flex items-center gap-1.5 bg-canvas p-1 rounded-full text-xs font-semibold overflow-x-auto">
               {[
                 { id: "all", label: `All (${categories.length})` },
@@ -702,30 +620,31 @@ export default function AdminCategories() {
                 <button
                   key={tab.id}
                   onClick={() => setCollectionFilter(tab.id)}
-                  className={`px-4 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer text-xs font-bold ${
-                    collectionFilter === tab.id
+                  className={`px-4 py-1.5 rounded-full transition-all whitespace-nowrap cursor-pointer text-xs font-bold ${collectionFilter === tab.id
                       ? "bg-surface text-primary shadow-xs"
                       : "text-text-secondary hover:text-text-primary hover:bg-surface/50"
-                  }`}
+                    }`}
                 >
                   {tab.label}
                 </button>
               ))}
             </div>
 
-            {/* Categories Table / Card Grid */}
             {loading ? (
-              <div className="py-16 text-center space-y-3">
-                <ReloadOutlined className="animate-spin text-3xl text-primary" />
-                <p className="text-xs font-semibold text-text-secondary">Loading categories...</p>
-              </div>
+              <Loader
+                text="Loading categories..."
+                subtext="Syncing classifications and collection tags"
+                className="py-12"
+              />
             ) : filteredCategories.length === 0 ? (
               <div className="py-14 text-center space-y-3 bg-canvas/60 rounded-2xl border border-dashed border-border p-6">
                 <div className="w-12 h-12 rounded-full bg-surface mx-auto flex items-center justify-center text-xl text-text-secondary shadow-xs">
                   <TagsOutlined />
                 </div>
                 <div className="space-y-1">
-                  <h4 className="text-sm font-bold text-text-primary">No categories found</h4>
+                  <h4 className="text-sm font-bold text-text-primary">
+                    No categories found
+                  </h4>
                   <p className="text-xs text-text-secondary max-w-sm mx-auto">
                     {searchQuery
                       ? `No category matched "${searchQuery}". Try a different keyword.`
@@ -747,10 +666,10 @@ export default function AdminCategories() {
                 {filteredCategories.map((cat) => {
                   const createdDate = cat.createdAt
                     ? new Date(cat.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })
                     : "Active";
 
                   return (
@@ -758,7 +677,6 @@ export default function AdminCategories() {
                       key={cat._id || cat.id}
                       className="p-4 rounded-2xl bg-canvas hover:bg-canvas/80 border border-border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
                     >
-                      {/* Left: Icon, Name & Slug */}
                       <div className="flex items-center gap-3.5 min-w-0">
                         <div className="w-10 h-10 rounded-2xl bg-surface border border-border flex items-center justify-center text-sm font-bold text-primary shadow-2xs group-hover:scale-105 transition-transform flex-shrink-0">
                           {cat.name ? cat.name[0].toUpperCase() : "C"}
@@ -773,9 +691,8 @@ export default function AdminCategories() {
                           </div>
 
                           <div className="flex items-center gap-3 mt-1 text-[11px] text-text-secondary flex-wrap">
-                            <span className="font-mono bg-surface px-2 py-0.5 rounded-md border border-border text-text-primary flex items-center gap-1">
-                              <LinkOutlined className="text-primary text-[10px]" />
-                              {cat.slug || computeSlug(cat.name)}
+                            <span className="font-mono bg-surface px-2.5 py-0.5 rounded-md border border-border text-text-primary text-[11px]">
+                              /products/{cat.slug || computeSlug(cat.name)}
                             </span>
                             <span className="text-[10px] text-text-secondary">
                               Added {createdDate}
@@ -783,62 +700,19 @@ export default function AdminCategories() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Right: Actions */}
-                      <div className="flex items-center gap-2 self-end sm:self-center">
-                        <Tooltip title="Copy slug">
-                          <Button
-                            type="text"
-                            shape="circle"
-                            size="small"
-                            icon={<CopyOutlined />}
-                            onClick={() => copySlug(cat.slug || computeSlug(cat.name))}
-                            className="text-text-secondary! hover:text-primary! hover:bg-surface!"
-                          />
-                        </Tooltip>
-
-                        <Tooltip title="Edit category">
-                          <Button
-                            type="text"
-                            shape="circle"
-                            size="small"
-                            icon={<EditOutlined />}
-                            onClick={() => openEditModal(cat)}
-                            className="text-text-secondary! hover:text-primary! hover:bg-surface!"
-                          />
-                        </Tooltip>
-
-                        <Popconfirm
-                          title="Delete Category"
-                          description="Are you sure you want to delete this category? Make sure no products are attached to it."
-                          onConfirm={() => handleDeleteCategory(cat._id || cat.id)}
-                          okText="Delete"
-                          cancelText="Cancel"
-                          okButtonProps={{ danger: true }}
-                        >
-                          <Tooltip title="Delete category">
-                            <Button
-                              type="text"
-                              shape="circle"
-                              size="small"
-                              danger
-                              icon={<DeleteOutlined />}
-                              className="hover:bg-red-50!"
-                            />
-                          </Tooltip>
-                        </Popconfirm>
-                      </div>
                     </div>
                   );
                 })}
               </div>
             )}
 
-            {/* Catalog Info Footer */}
             <div className="p-3.5 bg-canvas rounded-2xl border border-border flex items-center justify-between text-xs text-text-secondary">
               <div className="flex items-center gap-2">
                 <InfoCircleOutlined className="text-primary" />
-                <span>Categories are directly linked to products in the Add / Edit Product flow.</span>
+                <span>
+                  Categories are directly linked to products in the Add / Edit
+                  Product flow.
+                </span>
               </div>
               <Link
                 to="/admin/products"
@@ -850,72 +724,6 @@ export default function AdminCategories() {
           </div>
         </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* 4. EDIT CATEGORY MODAL                                                    */}
-      {/* ========================================================================= */}
-      <Modal
-        open={editModalOpen}
-        onCancel={() => {
-          setEditModalOpen(false);
-          setEditingCategory(null);
-        }}
-        onOk={handleUpdateCategory}
-        confirmLoading={editSubmitting}
-        okText="Save Changes"
-        title={
-          <div className="flex items-center gap-2 text-base font-bold text-text-primary">
-            <EditOutlined className="text-primary" />
-            <span>Edit Category</span>
-          </div>
-        }
-        okButtonProps={{
-          className: "bg-primary! rounded-full! font-bold! text-xs!",
-        }}
-        cancelButtonProps={{
-          className: "rounded-full! font-semibold! text-xs!",
-        }}
-        className="rounded-2xl"
-      >
-        <div className="py-4 space-y-4">
-          <div>
-            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-1.5">
-              Category Name
-            </label>
-            <Input
-              value={editName}
-              onChange={(e) => setEditName(e.target.value)}
-              placeholder="Category name"
-              className="py-2.5! px-3! bg-canvas! text-sm! font-semibold! rounded-xl!"
-            />
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-1.5">
-              Updated Slug Preview
-            </label>
-            <div className="font-mono text-xs text-primary bg-canvas px-3 py-2 rounded-xl border border-border">
-              /{editPreviewSlug || "category-slug"}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-bold text-text-secondary uppercase tracking-wider mb-1.5">
-              Department Collection
-            </label>
-            <Select
-              value={editCollection}
-              onChange={(val) => setEditCollection(val)}
-              className="w-full text-xs font-semibold"
-              options={[
-                { value: "men", label: "Men's Department" },
-                { value: "women", label: "Women's Department" },
-                { value: "kids", label: "Kids' Department" },
-              ]}
-            />
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }
