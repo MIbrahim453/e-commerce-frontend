@@ -169,24 +169,6 @@ export default function ResetPassword() {
               />
             </Form.Item>
 
-            <div className="mb-2! px-1!">
-              <div className="grid! grid-cols-4! gap-1! mb-1!">
-                <div className="h-1! rounded-full! bg-primary!" />
-                <div className="h-1! rounded-full! bg-primary!" />
-                <div className="h-1! rounded-full! bg-primary!" />
-                <div className="h-1! rounded-full! bg-primary!" />
-              </div>
-              <div className="flex! items-center! justify-between! text-[10px]!">
-                <span className="text-gray-600! font-medium!">
-                  <span className="inline-block! w-1.5! h-1.5! rounded-full! bg-emerald-500! mr-1!" />
-                  Strength: <strong className="text-[#1a1a1a]!">Strong</strong>
-                </span>
-                <span className="text-gray-400!">
-                  6+ characters recommended
-                </span>
-              </div>
-            </div>
-
             <Form.Item
               name="confirmPassword"
               label={
