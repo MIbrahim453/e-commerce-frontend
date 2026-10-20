@@ -10,6 +10,11 @@ export const loginApi = async (payload) => {
   return response;
 };
 
+export const googleAuthApi = async (payload) => {
+  const response = await api.post("/auth/google", payload);
+  return response;
+};
+
 export const logoutApi = async () => {
   const response = await api.post("/auth/logout");
   return response;
@@ -26,6 +31,8 @@ export const forgotPasswordApi = async (email) => {
 };
 
 export const resetPasswordApi = async (token, password) => {
-  const response = await api.post(`/auth/reset-password/${token}`, { password });
+  const response = await api.post(`/auth/reset-password/${token}`, {
+    password,
+  });
   return response;
 };

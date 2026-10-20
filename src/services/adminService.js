@@ -36,19 +36,26 @@ export const deleteProductApi = async (id) => {
   return await api.delete(`/product/delete-product/${id}`);
 };
 
-export const markTrendingApi = async (id) => {
-  return await api.put(`/product/mark-trending/${id}`);
+export const markTrendingApi = async (id, status) => {
+  return await api.put(`/product/mark-trending/${id}`, { status });
 };
 
-export const markNewArrivalApi = async (id) => {
-  return await api.put(`/product/mark-new/${id}`);
+export const markNewArrivalApi = async (id, status) => {
+  return await api.put(`/product/mark-new/${id}`, { status });
+};
+
+export const updateProductDiscountApi = async (id, discount) => {
+  return await api.put(`/product/update-discount/${id}`, { discount });
 };
 
 export const getSingleProductBySlugApi = async (slug) => {
   return await api.get(`/product/get-single-product/${slug}`);
 };
 
-// Order APIs
+export const getSingleProductApi = async (idOrSlug) => {
+  return await api.get(`/product/get-single-product/${idOrSlug}`);
+};
+
 export const getAllOrdersApi = async () => {
   return await api.get("/order/all-orders");
 };
@@ -65,6 +72,10 @@ export const changeOrderStatusApi = async (id, status) => {
   return await api.patch(`/order/change-order-status/${id}`, { status });
 };
 
+export const changeCODPaymentStatusApi = async (id, status = "PAID") => {
+  return await api.patch(`/order/change-cod-payment-status/${id}`, { status });
+};
+
 export const cancelOrderApi = async (id) => {
   return await api.delete(`/order/cancel-order/${id}`);
 };
@@ -73,7 +84,6 @@ export const editOrderApi = async (id, payload) => {
   return await api.put(`/order/edit-order/${id}`, payload);
 };
 
-// Revenue APIs
 export const getRevenueStatsApi = async () => {
   return await api.get("/revenue/stats");
 };
