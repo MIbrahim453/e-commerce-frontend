@@ -1,10 +1,10 @@
-import React from 'react'
-import Hero from './Hero'
-import Features from './Features'
-import TrendingProducts from './TrendingProducts'
-import ShopByCategory from './ShopByCategory'
-import Testimonials from './Testimonials'
-import CTA from './CTA'
+import React from "react";
+import Hero from "./Hero";
+import Features from "./Features";
+import TrendingProducts from "./TrendingProducts";
+import ShopByCategory from "./ShopByCategory";
+import Testimonials from "./Testimonials";
+import CTA from "./CTA";
 
 function Home() {
   return (
@@ -16,7 +16,7 @@ function Home() {
       <Features />
       <CTA />
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

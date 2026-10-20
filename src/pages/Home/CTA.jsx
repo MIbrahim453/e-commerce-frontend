@@ -1,6 +1,10 @@
-import React from 'react'
-import { Button } from 'antd'
-import { ArrowRightOutlined, CompassOutlined, CheckCircleFilled } from '@ant-design/icons'
+import React from "react";
+import { Button } from "antd";
+import {
+  ArrowRightOutlined,
+  CompassOutlined,
+  CheckCircleFilled,
+} from "@ant-design/icons";
 
 function CTA() {
   return (
@@ -15,10 +19,12 @@ function CTA() {
           </span>
         </div>
         <h2 className="text-3xl! sm:text-4xl! lg:text-5xl! font-semibold! text-text-primary! tracking-[-0.05em]! leading-[1.12]! m-0! mb-3! sm:mb-4! max-w-2xl!">
-          Ready to elevate your everyday living<span className="text-primary!">?</span>
+          Ready to elevate your everyday living
+          <span className="text-primary!">?</span>
         </h2>
         <p className="text-body-md! sm:text-body-lg! text-text-secondary! font-normal! leading-relaxed! max-w-xl! m-0! mb-8! sm:mb-10!">
-          Explore our curated collection of architectural objects, artisan home goods, and precision everyday carry crafted for intentional living.
+          Explore our curated collection of architectural objects, artisan home
+          goods, and precision everyday carry crafted for intentional living.
         </p>
         <div className="flex! flex-col! sm:flex-row! items-center! justify-center! gap-3.5! sm:gap-4! w-full! sm:w-auto!">
           <Button
@@ -56,7 +62,7 @@ function CTA() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default CTA
+export default CTA;

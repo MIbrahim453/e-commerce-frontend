@@ -1,57 +1,57 @@
-import React from 'react'
-import { Rate, Avatar } from 'antd'
-import { CheckCircleFilled } from '@ant-design/icons'
+import React from "react";
+import { Rate, Avatar } from "antd";
+import { CheckCircleFilled } from "@ant-design/icons";
 
 const testimonials = [
   {
     id: 1,
     rating: 5,
     quote:
-      'The craftsmanship on the ceramic pour-over and the textured table lamp exceeded all my expectations. My morning ritual feels completely transformed.',
-    author: 'Elena Rostova',
-    role: 'Interior Designer, Stockholm',
-    avatar: 'ER',
-    verifiedProduct: 'Nordic Ceramic Carafe',
+      "The craftsmanship on the ceramic pour-over and the textured table lamp exceeded all my expectations. My morning ritual feels completely transformed.",
+    author: "Elena Rostova",
+    role: "Interior Designer, Stockholm",
+    avatar: "ER",
+    verifiedProduct: "Nordic Ceramic Carafe",
   },
   {
     id: 2,
     rating: 5,
     quote:
-      'Finding technology that doesn’t scream gadget is so rare. The obsidian headphones blend naturally into my living space with concert-hall acoustic clarity.',
-    author: 'Marcus Vance',
-    role: 'Creative Director, London',
-    avatar: 'MV',
-    verifiedProduct: 'Over-Ear Headphones',
+      "Finding technology that doesn’t scream gadget is so rare. The obsidian headphones blend naturally into my living space with concert-hall acoustic clarity.",
+    author: "Marcus Vance",
+    role: "Creative Director, London",
+    avatar: "MV",
+    verifiedProduct: "Over-Ear Headphones",
   },
   {
     id: 3,
     rating: 5,
     quote:
-      'From seamless checkout to the unboxing experience, every detail breathes intentionality and care. It’s hard to imagine shopping anywhere else.',
-    author: 'Sophia Chen',
-    role: 'Architect, Tokyo',
-    avatar: 'SC',
-    verifiedProduct: 'Sculptural Table Lamp',
+      "From seamless checkout to the unboxing experience, every detail breathes intentionality and care. It’s hard to imagine shopping anywhere else.",
+    author: "Sophia Chen",
+    role: "Architect, Tokyo",
+    avatar: "SC",
+    verifiedProduct: "Sculptural Table Lamp",
   },
-]
+];
 
 function Testimonials() {
   return (
     <section className="w-full! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! sm:py-12!">
-      <div className="flex! flex-col! items-center! text-center! mb-8! sm:mb-12! max-w-2xl! mx-auto!">``
+      <div className="flex! flex-col! items-center! text-center! mb-8! sm:mb-12! max-w-2xl! mx-auto!">
+        ``
         <div className="inline-flex! items-center! gap-2! px-3.5! py-1.5! rounded-full! bg-canvas! border! border-border! mb-3! sm:mb-4!">
           <span className="w-1.5! h-1.5! rounded-full! bg-primary!" />
           <span className="text-label-sm! font-medium! text-text-secondary!">
             Community Voices
           </span>
         </div>
-
         <h2 className="text-2xl! sm:text-3xl! lg:text-4xl! font-semibold! text-text-primary! tracking-[-0.031em]! m-0! mb-2! sm:mb-3!">
           Loved by Curators & Collectors<span className="text-primary!">.</span>
         </h2>
-
         <p className="text-body-md! text-text-secondary! font-normal! leading-relaxed! m-0!">
-          Real stories from design enthusiasts who elevated their daily rituals with our objects.
+          Real stories from design enthusiasts who elevated their daily rituals
+          with our objects.
         </p>
       </div>
 
@@ -98,7 +98,7 @@ function Testimonials() {
         ))}
       </div>
     </section>
-  )
+  );
 }
 
-export default Testimonials
+export default Testimonials;

@@ -1,37 +1,41 @@
-import React from 'react'
+import React from "react";
 import {
   ThunderboltOutlined,
   UndoOutlined,
   InboxOutlined,
   CustomerServiceOutlined,
-} from '@ant-design/icons'
+} from "@ant-design/icons";
 
 const features = [
   {
     id: 1,
-    icon: <ThunderboltOutlined className="text-primary! text-lg! sm:text-xl!" />,
-    title: 'Next-Day Delivery',
-    description: 'Express courier fulfillment directly from local hubs.',
+    icon: (
+      <ThunderboltOutlined className="text-primary! text-lg! sm:text-xl!" />
+    ),
+    title: "Next-Day Delivery",
+    description: "Express courier fulfillment directly from local hubs.",
   },
   {
     id: 2,
     icon: <UndoOutlined className="text-primary! text-lg! sm:text-xl!" />,
-    title: '30-Day Returns',
-    description: 'Guaranteed hassle-free returns with home pickup.',
+    title: "30-Day Returns",
+    description: "Guaranteed hassle-free returns with home pickup.",
   },
   {
     id: 3,
     icon: <InboxOutlined className="text-primary! text-lg! sm:text-xl!" />,
-    title: 'Carbon-Neutral Packaging',
-    description: '100% recyclable, plastic-free pulp containers.',
+    title: "Carbon-Neutral Packaging",
+    description: "100% recyclable, plastic-free pulp containers.",
   },
   {
     id: 4,
-    icon: <CustomerServiceOutlined className="text-primary! text-lg! sm:text-xl!" />,
-    title: '24/7 Concierge',
-    description: 'Dedicated client advisors ready at any moment.',
+    icon: (
+      <CustomerServiceOutlined className="text-primary! text-lg! sm:text-xl!" />
+    ),
+    title: "24/7 Concierge",
+    description: "Dedicated client advisors ready at any moment.",
   },
-]
+];
 
 function Features() {
   return (
@@ -57,7 +61,7 @@ function Features() {
         </div>
       </div>
     </section>
-  )
+  );
 }
 
-export default Features
+export default Features;
