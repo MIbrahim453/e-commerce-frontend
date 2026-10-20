@@ -1,47 +1,59 @@
-import React, { useState } from 'react'
+import React, { useState } from "react";
+import ProductReviews from "./ProductReviews";
 
-const tabs = [
-  'Specifications',
-  "What's in the Box",
-  'Shipping & Returns',
-  'Verified Reviews (123)',
-]
+export default function ProductSpecs({ product }) {
+  const [activeTab, setActiveTab] = useState(0);
+  const [reviewCount, setReviewCount] = useState(null);
 
-const specsGrid = [
-  {
-    title: 'Transducer Topology',
-    value: '40mm Ceramic Titanium Driver',
-    detail: 'High-flux neodymium magnet system',
-  },
-  {
-    title: 'Frequency Response',
-    value: '10 Hz – 48,000 Hz',
-    detail: 'Certified Hi-Res Wireless & Cable',
-  },
-  {
-    title: 'Wireless Architecture',
-    value: 'Bluetooth 5.3 + Multipoint',
-    detail: 'Range to 15m*, aptX Adaptive, AAC, SBC',
-  },
-  {
-    title: 'Battery & Power System',
-    value: '55 Hours (ANC On) / 62 Hours (Off)',
-    detail: 'Quick-charge yields 7 hours playback',
-  },
-  {
-    title: 'Microphone System',
-    value: '6 MEMS Beamforming Array',
-    detail: 'AI ambient noise reduction & wind protection',
-  },
-  {
-    title: 'Total Mass',
-    value: '248 grams',
-    detail: 'Lightweight forged aluminum & leather',
-  },
-]
+  const tabs = [
+    "Specifications",
+    "Care & Instructions",
+    "Shipping & Returns",
+    reviewCount !== null
+      ? `Verified Reviews (${reviewCount})`
+      : "Verified Reviews",
+  ];
 
-export default function ProductSpecs() {
-  const [activeTab, setActiveTab] = useState(0)
+  const availableSizes =
+    product?.details?.sizes
+      ?.filter((s) => Number(s.stock) > 0)
+      ?.map((s) => s.size) || [];
+
+  const sizesSummary =
+    availableSizes.length > 0 ? availableSizes.join(", ") : "Out of Stock";
+
+  const specsGrid = [
+    {
+      title: "Material & Fabric",
+      value: product?.details?.material || "Premium Quality Composition",
+      detail: "Selected for durability, texture, and everyday performance",
+    },
+    {
+      title: "Color & Finish",
+      value: product?.details?.color || "Curated Shade",
+      detail: "Precision-dyed for rich tone and fade resistance",
+    },
+    {
+      title: "Category",
+      value: product?.category?.name || "Exclusive Catalog Item",
+      detail: `Department: ${product?.category?.categoryCollection ? product.category.categoryCollection.toUpperCase() : "General"}`,
+    },
+    {
+      title: "Size Availability",
+      value: sizesSummary,
+      detail: "True to size with comfort tailored fit",
+    },
+    {
+      title: "Care Instructions",
+      value: product?.details?.instructions || "Standard Wash & Care",
+      detail: "Follow manufacturer label guidance for optimal longevity",
+    },
+    {
+      title: "Shipping Standards",
+      value: "Tracked Carbon-Neutral Courier",
+      detail: "Dispatched within 24-48 business hours with signature option",
+    },
+  ];
 
   return (
     <div className="flex! flex-col! gap-5!">
@@ -51,60 +63,71 @@ export default function ProductSpecs() {
             key={tab}
             type="button"
             onClick={() => setActiveTab(idx)}
-            className={`px-4! sm:px-5! py-2! sm:py-2.5! rounded-full! text-xs! sm:text-sm! font-semibold! transition-all! cursor-pointer! shrink-0! border-0! ${
-              activeTab === idx
-                ? 'bg-[#1a1a1a]! text-white! shadow-xs!'
-                : 'bg-white! text-gray-600! hover:text-gray-900! border! border-[#ebebeb]!'
-            }`}
+            className={`px-4! sm:px-5! py-2! sm:py-2.5! rounded-full! text-xs! sm:text-sm! font-semibold! transition-all! cursor-pointer! shrink-0! border-0! ${activeTab === idx
+                ? "bg-[#1a1a1a]! text-white! shadow-xs!"
+                : "bg-white! text-gray-600! hover:text-gray-900! border! border-[#ebebeb]!"
+              }`}
           >
             {tab}
           </button>
         ))}
       </div>
 
-      <div className="bg-white! rounded-[28px]! border! border-[#ebebeb]! p-6! sm:p-8! lg:p-10! shadow-[0_4px_24px_rgba(0,0,0,0.03)]!">
-        <div className="grid! grid-cols-1! lg:grid-cols-12! gap-8! lg:gap-12! items-start!">
-          <div className="lg:col-span-5! flex! flex-col! gap-4!">
-            <h3 className="text-xl! sm:text-2xl! font-bold! text-[#1a1a1a]! leading-snug! tracking-tight! m-0!">
-              Uncompromised clarity across the full audible spectrum.
-            </h3>
-
-            <p className="text-xs! sm:text-sm! text-gray-500! leading-relaxed! m-0!">
-              Developed in Copenhagen with custom tuned 40mm titanium diaphragm transducers, precision laser vent dampeners, and 4 dedicated feedback microphones.
-            </p>
-
-            <div className="flex! flex-col! gap-3! pt-4! border-t! border-[#f0f0f0]!">
-              <div className="flex! items-center! justify-between! text-xs!">
-                <span className="text-gray-400! font-medium!">THD (Total Harmonic Distortion)</span>
-                <span className="font-semibold! text-gray-800!">&lt; 0.05% @ 1kHz</span>
-              </div>
-              <div className="flex! items-center! justify-between! text-xs!">
-                <span className="text-gray-400! font-medium!">Acoustic Principle</span>
-                <span className="font-semibold! text-gray-800!">Closed-back circumaural</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:col-span-7! grid! grid-cols-1! sm:grid-cols-2! gap-3.5! sm:gap-4!">
-            {specsGrid.map((spec) => (
+      <div className="bg-white! rounded-[28px]! border! border-[#ebebeb]! p-6! sm:p-8! shadow-level-1!">
+        {activeTab === 0 && (
+          <div className="grid! grid-cols-1! md:grid-cols-2! lg:grid-cols-3! gap-6!">
+            {specsGrid.map((spec, i) => (
               <div
-                key={spec.title}
-                className="bg-[#f8f9fa]! rounded-[20px]! p-4! border! border-[#ebebeb]! flex! flex-col! justify-center! gap-1!"
+                key={i}
+                className="flex! flex-col! gap-1.5! p-4! rounded-[20px]! bg-[#f8f9fa]! border! border-[#ebebeb]/60!"
               >
-                <span className="text-[11px]! font-medium! text-gray-400!">
+                <span className="text-[11px]! font-bold! text-gray-400! uppercase! tracking-wider!">
                   {spec.title}
                 </span>
-                <span className="text-[13px]! sm:text-sm! font-bold! text-[#1a1a1a]! leading-snug!">
+                <span className="text-sm! font-bold! text-[#1a1a1a]! leading-snug!">
                   {spec.value}
                 </span>
-                <span className="text-[11px]! text-gray-500! leading-tight!">
+                <span className="text-xs! text-gray-500! leading-relaxed!">
                   {spec.detail}
                 </span>
               </div>
             ))}
           </div>
+        )}
+
+        {activeTab === 1 && (
+          <div className="max-w-2xl! space-y-4! text-sm! text-gray-600!">
+            <h3 className="text-base! font-bold! text-[#1a1a1a]! m-0!">
+              Care & Maintenance Guidelines
+            </h3>
+            <p className="leading-relaxed!">
+              {product?.details?.instructions ||
+                "Machine wash cold with like colors on a delicate cycle. Do not bleach. Tumble dry on low or lay flat to dry to preserve the natural weave and finish."}
+            </p>
+          </div>
+        )}
+
+        {activeTab === 2 && (
+          <div className="max-w-2xl! space-y-3! text-sm! text-gray-600!">
+            <h3 className="text-base! font-bold! text-[#1a1a1a]! m-0!">
+              Shipping & 30-Day Returns
+            </h3>
+            <p className="leading-relaxed!">
+              Orders placed before 2:00 PM EST ship same-day. Complimentary
+              2-day delivery on all domestic orders. If you are not completely
+              satisfied, return within 30 days for an exchange or full refund.
+            </p>
+          </div>
+        )}
+
+        <div style={{ display: activeTab === 3 ? "block" : "none" }}>
+          <ProductReviews
+            productId={product?._id}
+            isEmbedded={true}
+            onStatsUpdate={({ totalReviews }) => setReviewCount(totalReviews)}
+          />
         </div>
       </div>
     </div>
-  )
+  );
 }

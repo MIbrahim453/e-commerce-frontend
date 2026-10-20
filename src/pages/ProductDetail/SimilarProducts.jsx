@@ -1,43 +1,93 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import { LeftOutlined, RightOutlined, PlusOutlined, EyeOutlined } from '@ant-design/icons'
-import lampImg from '../../assets/images/lamp.jpg'
-import categoryTechImg from '../../assets/images/category_tech.jpg'
-import categoryWorkspaceImg from '../../assets/images/category_workspace.jpg'
-import keyboardImg from '../../assets/images/keyboard.jpg'
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import {
+  LeftOutlined,
+  RightOutlined,
+  ArrowRightOutlined,
+} from "@ant-design/icons";
+import { getAllProductsApi } from "../../services/productService";
 
-const similarItems = [
-  {
-    id: 1,
-    category: 'Audio Accessories',
-    title: 'Sculpted Walnut Headphone Stand',
-    price: '$85.00',
-    image: lampImg,
-  },
-  {
-    id: 2,
-    category: 'Studio Hardware',
-    title: 'Pocket High-Res USB-C DAC Amp',
-    price: '$120.00',
-    image: categoryTechImg,
-  },
-  {
-    id: 3,
-    category: 'Replacements',
-    title: 'Perforated Lambskin Ear Pads',
-    price: '$45.00',
-    image: categoryWorkspaceImg,
-  },
-  {
-    id: 4,
-    category: 'Cables & Power',
-    title: 'Reinforced Braided USB-C Cable (2m)',
-    price: '$28.00',
-    image: keyboardImg,
-  },
-]
+export default function SimilarProducts({
+  category,
+  collection,
+  categoryId,
+  currentId,
+}) {
+  const [similarItems, setSimilarItems] = useState([]);
 
-export default function SimilarProducts() {
+  useEffect(() => {
+    const loadSimilar = async () => {
+      let allProducts = [];
+      try {
+        const raw = localStorage.getItem("products");
+        allProducts = raw ? JSON.parse(raw) : [];
+      } catch (e) {
+        console.error(e);
+      }
+
+      if (allProducts.length === 0) {
+        try {
+          const res = await getAllProductsApi();
+          allProducts = res?.data?.data?.products || [];
+          localStorage.setItem("products", JSON.stringify(allProducts));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      const otherProducts = allProducts.filter((p) => p._id !== currentId);
+
+      const targetCatId = category?._id;
+      const targetCatName = category?.name.toLowerCase();
+      const targetCollection = category?.categoryCollection.toLowerCase();
+
+      let matching = otherProducts.filter((p) => {
+        const pCatId = p.category?._id;
+        const pCatName = p.category?.name.toLowerCase();
+        const pCollection = p.category?.categoryCollection.toLowerCase();
+
+        const matchCat =
+          (targetCatId && pCatId === targetCatId) ||
+          (targetCatName && pCatName === targetCatName);
+        const matchCol = targetCollection && pCollection === targetCollection;
+
+        return matchCat && matchCol;
+      });
+
+      if (matching.length < 4) {
+        const partial = otherProducts.filter((p) => {
+          if (matching.some((m) => m._id === p._id)) return false;
+          const pCatId = p.category?._id;
+          const pCatName = p.category?.name.toLowerCase();
+          const pCollection = p.category?.categoryCollection.toLowerCase();
+
+          const matchCat =
+            (targetCatId && pCatId === targetCatId) ||
+            (targetCatName && pCatName === targetCatName);
+          const matchCol = targetCollection && pCollection === targetCollection;
+
+          return matchCat || matchCol;
+        });
+        matching = [...matching, ...partial];
+      }
+
+      if (matching.length < 4) {
+        const remaining = otherProducts.filter(
+          (p) => !matching.some((m) => m._id === p._id),
+        );
+        matching = [...matching, ...remaining];
+      }
+
+      setSimilarItems(matching.slice(0, 4));
+    };
+
+    loadSimilar();
+  }, [category, collection, categoryId, currentId]);
+
+  if (similarItems.length === 0) {
+    return null;
+  }
+
   return (
     <div className="flex! flex-col! gap-5!">
       <div className="flex! items-end! justify-between!">
@@ -49,75 +99,74 @@ export default function SimilarProducts() {
             Similar Products
           </h2>
         </div>
-
-        <div className="flex! items-center! gap-2!">
-          <button
-            type="button"
-            className="w-8! h-8! sm:w-9! sm:h-9! rounded-full! bg-white! border! border-[#ebebeb]! flex! items-center! justify-center! text-gray-600! hover:bg-gray-50! transition-colors! cursor-pointer! shadow-xs!"
-            aria-label="Previous items"
-          >
-            <LeftOutlined className="text-[10px]!" />
-          </button>
-          <button
-            type="button"
-            className="w-8! h-8! sm:w-9! sm:h-9! rounded-full! bg-white! border! border-[#ebebeb]! flex! items-center! justify-center! text-gray-600! hover:bg-gray-50! transition-colors! cursor-pointer! shadow-xs!"
-            aria-label="Next items"
-          >
-            <RightOutlined className="text-[10px]!" />
-          </button>
-        </div>
       </div>
 
-      <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-4! gap-5!">
-        {similarItems.map((item) => (
-          <div
-            key={item.id}
-            className="bg-white! rounded-[24px]! border! border-[#ebebeb]! p-3.5! hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]! transition-all! duration-300! flex! flex-col! justify-between! group!"
-          >
-            <div>
-              <Link to="/product" className="block! relative! w-full! aspect-[4/3]! rounded-[18px]! overflow-hidden! bg-[#f5f6f8]! flex! items-center! justify-center! mb-3!">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-500!"
-                />
-              </Link>
+      <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-4! gap-4! sm:gap-5!">
+        {similarItems.map((item) => {
+          const itemId = item._id || item.id;
+          const itemSlug = item.slug || itemId;
+          const hasDiscount = Number(item.discount) > 0;
+          const originalPrice = Number(item.price) || 0;
+          const discountedPrice = hasDiscount
+            ? originalPrice * (1 - Number(item.discount) / 100)
+            : originalPrice;
+          const img = item.thumbnail || item.images?.[0];
 
-              <span className="text-[10px]! font-bold! tracking-wider! uppercase! text-gray-400! block! mb-0.5!">
-                {item.category}
-              </span>
+          return (
+            <div
+              key={itemId}
+              className="bg-white! rounded-[24px]! border! border-[#ebebeb]! p-3! hover:shadow-[0_8px_24px_rgba(0,0,0,0.05)]! hover:border-gray-300! transition-all! flex! flex-col! justify-between! group!"
+            >
+              <div className="relative! w-full! aspect-[4/3]! rounded-[18px]! overflow-hidden! bg-[#f6f6f7]! flex! items-center! justify-center!">
+                {img ? (
+                  <img
+                    src={img}
+                    alt={item.name}
+                    className="w-full! h-full! object-cover! group-hover:scale-105! transition-transform! duration-300!"
+                  />
+                ) : (
+                  <div className="text-gray-400! text-xs!">No image</div>
+                )}
+                <span className="absolute! bottom-2! left-2! bg-white/90! backdrop-blur-xs! text-[10px]! font-bold! px-2! py-0.5! rounded-full! text-gray-700!">
+                  {item.category?.name || "Collection"}
+                </span>
+              </div>
 
-              <Link to="/product" className="block! no-underline!">
-                <h4 className="text-[13px]! font-bold! text-[#1a1a1a]! leading-snug! line-clamp-1! hover:text-[#5433eb]! transition-colors! mb-1!">
-                  {item.title}
-                </h4>
-              </Link>
+              <div className="pt-3! px-1!">
+                <Link
+                  to={`/product/${itemSlug}`}
+                  className="block! no-underline!"
+                >
+                  <h4 className="text-[13px]! font-bold! text-[#1a1a1a]! truncate! hover:text-[#5433eb]! transition-colors! m-0! mb-1!">
+                    {item.name}
+                  </h4>
+                </Link>
 
-              <span className="text-sm! font-bold! text-[#1a1a1a]! block!">
-                {item.price}
-              </span>
+                <div className="flex! items-center! justify-between! pt-1!">
+                  <div className="flex! items-baseline! gap-1.5!">
+                    <span className="text-sm! font-bold! text-[#1a1a1a]!">
+                      ${discountedPrice.toFixed(2)}
+                    </span>
+                    {hasDiscount && (
+                      <span className="text-[11px]! text-gray-400! line-through!">
+                        ${originalPrice.toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+
+                  <Link
+                    to={`/product/${itemSlug}`}
+                    className="w-7! h-7! rounded-full! bg-[#5433eb]! text-white! flex! items-center! justify-center! hover:bg-[#4324d4]! shadow-xs! transition-transform! active:scale-95!"
+                    aria-label="View product"
+                  >
+                    <ArrowRightOutlined className="text-[10px]!" />
+                  </Link>
+                </div>
+              </div>
             </div>
-
-            <div className="flex! flex-col! gap-2! pt-3! mt-3! border-t! border-gray-100!">
-              <Link
-                to="/product"
-                className="w-full! py-2! rounded-full! bg-white! hover:bg-gray-50! hover:border-[#5433eb]/40! text-[#1a1a1a]! text-xs! font-semibold! flex! items-center! justify-center! gap-1.5! transition-colors! cursor-pointer! border! border-[#ebebeb]! shadow-2xs! no-underline!"
-              >
-                <EyeOutlined className="text-[12px]!" />
-                <span>View Product</span>
-              </Link>
-
-              <button
-                type="button"
-                className="w-full! py-2! rounded-full! bg-[#f7f8fa]! hover:bg-[#eee9ff]! hover:text-[#5433eb]! text-gray-700! text-xs! font-semibold! flex! items-center! justify-center! gap-1.5! transition-colors! cursor-pointer! border! border-[#ebebeb]!"
-              >
-                <PlusOutlined className="text-[10px]!" />
-                <span>Add to Bag</span>
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
