@@ -91,3 +91,29 @@ export const getRevenueStatsApi = async () => {
 export const getAllPaymentsApi = async () => {
   return await api.get("/revenue/all-payments");
 };
+
+// ── User Management (Admin) ──
+
+export const getAllUsersApi = async () => {
+  return await api.get("/user/all-users");
+};
+
+export const getUserStatsApi = async () => {
+  return await api.get("/user/stats");
+};
+
+export const createUserApi = async (userData) => {
+  return await api.post("/user/create", userData);
+};
+
+export const updateUserApi = async (id, userData) => {
+  return await api.put(`/user/update/${id}`, userData);
+};
+
+export const deleteUserApi = async (id) => {
+  return await api.delete(`/user/delete/${id}`);
+};
+
+export const changeUserRoleApi = async (id, role) => {
+  return await api.patch(`/user/change-role/${id}`, { role });
+};

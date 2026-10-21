@@ -20,10 +20,11 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false);
 
   const redirectAfterAuth = (authUser) => {
-    const target =
-      location.state?.from ||
-      (authUser?.role === "admin" ? "/admin/dashboard" : "/");
-    navigate(target, { replace: true });
+    if (authUser?.role === "admin") {
+      navigate("/admin/dashboard", { replace: true });
+    } else {
+      navigate(location.state?.from || "/", { replace: true });
+    }
   };
 
   const handleGoogleSignIn = async () => {

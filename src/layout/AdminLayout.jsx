@@ -20,6 +20,7 @@ import {
   LogoutOutlined,
   MenuOutlined,
   CloseOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 
 export default function AdminLayout() {
@@ -65,6 +66,11 @@ export default function AdminLayout() {
       label: "Revenue & Payments",
       icon: <CreditCardOutlined className="text-lg!" />,
     },
+    {
+      to: "/admin/users",
+      label: "Users",
+      icon: <TeamOutlined className="text-lg!" />,
+    },
   ];
 
   const breadcrumbs = useMemo(() => {
@@ -103,6 +109,9 @@ export default function AdminLayout() {
         { label: "Admin", to: "/admin" },
         { label: "Revenue & Payments" },
       ];
+    }
+    if (path.startsWith("/admin/users")) {
+      return [{ label: "Admin", to: "/admin" }, { label: "Users" }];
     }
     return [{ label: "Admin", to: "/admin" }, { label: "Portal" }];
   }, [location.pathname]);

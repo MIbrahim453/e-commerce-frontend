@@ -21,6 +21,7 @@ import AdminAddProduct from "./pages/Admin/AdminAddProduct";
 import AdminEditProduct from "./pages/Admin/AdminEditProduct";
 import AdminCategories from "./pages/Admin/AdminCategories";
 import AdminPayments from "./pages/Admin/AdminPayments";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 export default function AppRoutes() {
   return (
@@ -59,6 +60,7 @@ export default function AppRoutes() {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="categories/new" element={<AdminCategories />} />
           <Route path="payments" element={<AdminPayments />} />
+          <Route path="users" element={<AdminUsers />} />
         </Route>
       </Route>
 
