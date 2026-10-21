@@ -196,7 +196,6 @@ export default function SignUp() {
                   </span>
                 }
                 className="mb-1.5!"
-                initialValue="Alex"
               >
                 <Input
                   prefix={
@@ -215,7 +214,6 @@ export default function SignUp() {
                   </span>
                 }
                 className="mb-1.5!"
-                initialValue="Morgan"
               >
                 <Input
                   placeholder="Last name"
@@ -232,7 +230,6 @@ export default function SignUp() {
                 </span>
               }
               className="mb-1.5!"
-              initialValue="alex.morgan@designstudio.com"
             >
               <Input
                 prefix={
@@ -251,7 +248,6 @@ export default function SignUp() {
                 </span>
               }
               className="mb-1.5!"
-              initialValue="+14158924100"
             >
               <Input
                 prefix={
@@ -276,28 +272,11 @@ export default function SignUp() {
                   <LockOutlined className="text-gray-400! mr-2! text-xs! shrink-0!" />
                 }
                 placeholder="Create strong password"
-                defaultValue="••••••••••••"
                 className="w-full! bg-[#f7f8fa]! border! border-[#ebebeb]! hover:border-[#5433eb]! focus:border-[#5433eb]! focus-within:border-[#5433eb]! focus-within:bg-white! focus-within:ring-2! focus-within:ring-[#5433eb]/10! rounded-full! px-3.5! py-1.5! text-xs! sm:text-[13px]! text-[#1a1a1a]! font-medium! shadow-none! transition-all! [&>input]:border-0! [&>input]:outline-none! [&>input]:ring-0! [&>input]:bg-transparent!"
               />
             </Form.Item>
 
-            <div className="mb-2! px-1!">
-              <div className="grid! grid-cols-4! gap-1! mb-1!">
-                <div className="h-1! rounded-full! bg-[#5433eb]!" />
-                <div className="h-1! rounded-full! bg-[#5433eb]!" />
-                <div className="h-1! rounded-full! bg-[#5433eb]!" />
-                <div className="h-1! rounded-full! bg-gray-200!" />
-              </div>
-              <div className="flex! items-center! justify-between! text-[10px]!">
-                <span className="text-gray-600! font-medium!">
-                  <span className="inline-block! w-1.5! h-1.5! rounded-full! bg-[#5433eb]! mr-1!" />
-                  Strength: <strong className="text-[#1a1a1a]!">Good</strong>
-                </span>
-                <span className="text-gray-400!">
-                  8+ chars, 1 number &amp; symbol
-                </span>
-              </div>
-            </div>
+
 
             <div className="my-1.5! rounded-2xl! bg-[#fbfbfc]! border! border-[#ebebeb]! overflow-hidden! transition-all!">
               <button
@@ -430,44 +409,7 @@ export default function SignUp() {
               )}
             </div>
 
-            <div className="flex! flex-col! gap-1.5! my-2!">
-              <label className="flex! items-center! gap-2! cursor-pointer! select-none!">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-3.5! h-3.5! rounded! accent-[#5433eb]! cursor-pointer!"
-                />
-                <span className="text-[11px]! text-gray-600!">
-                  I agree to the{" "}
-                  <a
-                    href="#terms"
-                    className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!"
-                  >
-                    Terms of Service
-                  </a>{" "}
-                  and{" "}
-                  <a
-                    href="#privacy"
-                    className="text-[#1a1a1a]! font-semibold! hover:text-[#5433eb]! underline!"
-                  >
-                    Privacy Policy
-                  </a>
-                  .
-                </span>
-              </label>
 
-              <label className="flex! items-center! gap-2! cursor-pointer! select-none!">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="w-3.5! h-3.5! rounded! accent-[#5433eb]! cursor-pointer!"
-                />
-                <span className="text-[11px]! text-gray-600!">
-                  Receive curated drops, private studio releases, and editorial
-                  updates.
-                </span>
-              </label>
-            </div>
 
             <Form.Item className="mb-0! mt-1!">
               <Button
