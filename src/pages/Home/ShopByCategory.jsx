@@ -139,7 +139,7 @@ function ShopByCategory() {
             to={`/products?category=${encodeURIComponent(featuredCategory.name)}`}
             className="no-underline! group! block! h-full!"
           >
-            <div className="relative! h-full! min-h-[380px]! sm:min-h-[460px]! rounded-card! overflow-hidden! shadow-level-1! border! border-border! flex! flex-col! justify-between! p-6! sm:p-8!">
+            <div className="relative! h-full! min-h-[380px]! sm:min-h-[460px]! rounded-card! overflow-hidden! shadow-level-1! border! border-border! flex! flex-col! justify-end! p-6! sm:p-8!">
               {/* Background Image with Zoom */}
               <img
                 src={featuredCategory.image}
@@ -149,16 +149,6 @@ function ShopByCategory() {
 
               {/* Gradient Scrim */}
               <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/40! to-black/10! transition-opacity! group-hover:opacity-90!" />
-
-              {/* Top Tag */}
-              <div className="relative! z-10! flex! items-center! justify-between!">
-                <span className="px-3! py-1! rounded-full! bg-white/20! backdrop-blur-md! text-white! text-xs! font-bold! tracking-wider! uppercase! border! border-white/20!">
-                  Headline Capsule
-                </span>
-                <span className="text-white/80! text-xs! font-semibold!">
-                  {featuredCategory.count}
-                </span>
-              </div>
 
               {/* Bottom Content */}
               <div className="relative! z-10! flex! flex-col! gap-2!">
@@ -198,9 +188,6 @@ function ShopByCategory() {
 
                 {/* Content */}
                 <div className="relative! z-10! flex! flex-col! gap-1! max-w-[70%]!">
-                  <span className="text-[#a594fd]! text-[11px]! font-bold! tracking-wider! uppercase!">
-                    {cat.count}
-                  </span>
                   <h3 className="text-lg! sm:text-xl! font-bold! text-white! m-0! tracking-tight! group-hover:text-white! transition-colors!">
                     {cat.name}
                   </h3>

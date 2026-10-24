@@ -491,25 +491,9 @@ export default function AdminOrders() {
           <div className="lg:col-span-5 bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1 space-y-6">
             <div className="flex items-center justify-between pb-3 border-b border-border">
               <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-extrabold text-text-primary tracking-tight">
-                    Order #{selectedOrder.orderNumber}
-                  </h3>
-                  <Tag
-                    className={`rounded-full! px-2.5! py-0.5! text-[11px] font-bold! border-0! m-0! ${selectedOrder.orderStatus === "DELIVERED"
-                        ? "bg-emerald-50! text-emerald-700!"
-                        : selectedOrder.orderStatus === "CANCELLED"
-                          ? "bg-red-50! text-red-600!"
-                          : selectedOrder.orderStatus === "SHIPPED"
-                            ? "bg-blue-50! text-blue-700!"
-                            : selectedOrder.orderStatus === "CONFIRMED"
-                              ? "bg-amber-50! text-amber-700!"
-                              : "bg-purple-50! text-[#5433eb]!"
-                      }`}
-                  >
-                    {selectedOrder.orderStatus}
-                  </Tag>
-                </div>
+                <h3 className="text-base font-extrabold text-text-primary tracking-tight m-0">
+                  Order #{selectedOrder.orderNumber}
+                </h3>
                 <p className="text-[11px] text-text-secondary mt-0.5">
                   Placed on{" "}
                   {selectedOrder.createdAt

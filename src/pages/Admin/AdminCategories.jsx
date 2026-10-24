@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Button, Input, message, Progress } from "antd";
+import { Button, Input, message, Progress, Popconfirm } from "antd";
 import {
   TagsOutlined,
   PlusOutlined,
@@ -10,16 +10,16 @@ import {
   CheckCircleOutlined,
   ArrowRightOutlined,
   ThunderboltOutlined,
-  LinkOutlined,
   ManOutlined,
   WomanOutlined,
   SmileOutlined,
-  CopyOutlined,
   InfoCircleOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import {
   getCategoriesApi,
   createCategoryApi,
+  deleteCategoryApi,
 } from "../../services/adminService";
 import Loader from "../../components/Loader";
 
@@ -122,6 +122,26 @@ export default function AdminCategories() {
   const handleApplyPreset = (preset) => {
     setName(preset.name);
     setCategoryCollection(preset.collection);
+  };
+
+  const handleDeleteCategory = async (id) => {
+    try {
+      const res = await deleteCategoryApi(id);
+      if (res?.data?.success) {
+        message.success(
+          res.data.message || "Category deleted successfully!",
+        );
+        await fetchCategories();
+      } else {
+        message.error(res?.data?.message || "Failed to delete category");
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      message.error(
+        error.response?.data?.message ||
+          "Failed to delete category. Please try again.",
+      );
+    }
   };
 
   const filteredCategories = categories.filter((cat) => {
@@ -698,6 +718,27 @@ export default function AdminCategories() {
                             </span>
                           </div>
                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-center">
+                        <Popconfirm
+                          title="Delete Category"
+                          description="Are you sure? This will delete all products in this category and mark related orders as cancelled."
+                          onConfirm={() =>
+                            handleDeleteCategory(cat._id || cat.id)
+                          }
+                          okText="Delete"
+                          cancelText="Cancel"
+                          okButtonProps={{ danger: true }}
+                        >
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined className="text-sm" />}
+                            className="rounded-xl! hover:bg-red-50! text-red-500! flex! items-center! justify-center! p-2!"
+                            title="Delete Category"
+                          />
+                        </Popconfirm>
                       </div>
                     </div>
                   );
