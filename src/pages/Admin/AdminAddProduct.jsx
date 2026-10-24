@@ -358,7 +358,7 @@ export default function AdminAddProduct() {
             <span>&gt;</span>
             <span className="text-text-primary">Add New Product</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary mt-1">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary mt-1 m-0">
             Add New Product
           </h1>
         </div>

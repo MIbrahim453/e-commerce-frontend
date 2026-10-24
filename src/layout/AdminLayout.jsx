@@ -173,103 +173,116 @@ export default function AdminLayout() {
       }}
     >
       <div className="min-h-screen bg-canvas text-text-primary flex flex-col lg:flex-row font-sans selection:bg-primary/20 selection:text-primary">
-        <aside className="hidden lg:flex lg:flex-col w-64 xl:w-72 bg-surface border-r border-border fixed inset-y-0 left-0 z-40 shadow-level-1">
-          <div className="h-20 flex items-center px-6 border-b border-border">
-            <Link to="/admin" className="flex items-center group">
+        <aside className="hidden lg:flex lg:flex-col w-64 xl:w-72 bg-[#0e0e13] border-r border-white/10 fixed inset-y-0 left-0 z-40 shadow-2xl">
+          {/* Logo & Operational Status */}
+          <div className="h-16 flex items-center justify-between px-6 border-b border-white/10 shrink-0">
+            <Link to="/admin" className="flex items-center gap-2 group">
               <img
                 src={logo}
                 alt="shop."
-                className="h-7 w-auto object-contain transition-transform group-hover:scale-105"
+                className="h-6 w-auto object-contain brightness-0 invert"
               />
             </Link>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/10 border border-white/15 text-white">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+              </span>
+              <span className="text-[10px] font-bold tracking-wider uppercase text-white/90">
+                Console
+              </span>
+            </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6">
-            <div>
-              <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
-                Main Navigation
+          <div className="flex-1 px-4 py-4 flex flex-col justify-between overflow-hidden">
+            <div className="space-y-4">
+              <div>
+                <div className="px-3 mb-2 text-[10px] font-extrabold uppercase tracking-widest text-white/40">
+                  Store Management
+                </div>
+                <nav className="space-y-1">
+                  {navItems.map((item) => (
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      end={item.end}
+                      className={({ isActive }) =>
+                        `group flex items-center px-3.5 py-2.5 rounded-xl text-[13px] font-semibold transition-all duration-200 no-underline ${
+                          isActive
+                            ? "bg-[#5433eb]! text-white! font-bold! shadow-[0_4px_16px_rgba(84,51,235,0.4)]!"
+                            : "text-white/65! hover:text-white! hover:bg-white/6!"
+                        }`
+                      }
+                    >
+                      {({ isActive }) => (
+                        <div className="flex items-center gap-3">
+                          <span
+                            className={`text-base transition-colors ${
+                              isActive
+                                ? "text-white!"
+                                : "text-white/60! group-hover:text-white!"
+                            }`}
+                          >
+                            {item.icon}
+                          </span>
+                          <span>{item.label}</span>
+                        </div>
+                      )}
+                    </NavLink>
+                  ))}
+                </nav>
               </div>
-              <nav className="space-y-1.5">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.end}
-                    className={({ isActive }) =>
-                      `group flex items-center px-4 py-3 rounded-2xl text-[14px] font-semibold transition-all duration-200 ${
-                        isActive
-                          ? "bg-[#f0eded]! text-text-primary! font-bold! shadow-2xs!"
-                          : "text-text-secondary! hover:text-text-primary! hover:bg-canvas!"
-                      }`
-                    }
+
+              <div>
+                <div className="px-3 mb-2 text-[10px] font-extrabold uppercase tracking-widest text-white/40">
+                  Storefront Access
+                </div>
+                <div className="space-y-1">
+                  <Link
+                    to="/"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group flex items-center justify-between px-3.5 py-2 rounded-xl text-[12.5px] font-medium text-white/65 hover:text-white hover:bg-white/6 transition-colors no-underline"
                   >
-                    {({ isActive }) => (
-                      <div className="flex items-center gap-3.5">
-                        <span
-                          className={`text-lg transition-colors ${
-                            isActive
-                              ? "text-primary!"
-                              : "text-text-secondary! group-hover:text-text-primary!"
-                          }`}
-                        >
-                          {item.icon}
-                        </span>
-                        <span>{item.label}</span>
-                      </div>
-                    )}
-                  </NavLink>
-                ))}
-              </nav>
-            </div>
-
-            <div>
-              <div className="px-3 mb-2 text-[11px] font-bold uppercase tracking-wider text-text-secondary">
-                Quick Shortcuts
-              </div>
-              <div className="space-y-1">
-                <Link
-                  to="/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group flex items-center justify-between px-4 py-2.5 rounded-2xl text-[13px] font-medium text-text-secondary hover:text-text-primary hover:bg-canvas transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <ShopOutlined className="text-base text-text-secondary group-hover:text-primary" />
-                    <span>Customer Storefront</span>
-                  </div>
-                  <span className="text-[11px] text-text-secondary bg-canvas px-2 py-0.5 rounded-md">
-                    View
-                  </span>
-                </Link>
+                    <div className="flex items-center gap-2.5">
+                      <ShopOutlined className="text-sm text-[#a594fd]" />
+                      <span>Customer Storefront</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-white/70 bg-white/10 px-2 py-0.5 rounded-md">
+                      Open
+                    </span>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="p-4 border-t border-border bg-surface">
-            <div className="flex items-center justify-between p-2 rounded-2xl hover:bg-canvas transition-colors">
+          {/* Profile Capsule */}
+          <div className="p-3 border-t border-white/10 bg-[#0a0a0e] shrink-0">
+            <div className="flex items-center justify-between p-2 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
               <div className="flex items-center gap-3 min-w-0">
                 <div className="relative flex-shrink-0">
                   {user?.profilePhoto ? (
                     <Avatar
                       src={user.profilePhoto}
-                      size={40}
-                      className="ring-2 ring-primary/20"
+                      size={38}
+                      className="ring-2 ring-[#5433eb]/50"
                     />
                   ) : (
                     <Avatar
-                      size={40}
-                      className="bg-gradient-to-tr from-primary to-[#7f5af0] text-on-primary font-bold text-sm shadow-sm"
+                      size={38}
+                      className="bg-gradient-to-tr from-[#5433eb] to-[#7f5af0] text-white font-bold text-xs shadow-sm"
                     >
                       {adminInitials}
                     </Avatar>
                   )}
-                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white" />
+                  <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-[#0e0e13]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-text-primary truncate leading-tight">
+                  <p className="text-xs font-bold text-white truncate leading-tight m-0">
                     {adminName}
                   </p>
-                  <p className="text-xs text-text-secondary truncate leading-tight">
+                  <p className="text-[11px] text-white/50 truncate leading-tight mt-0.5 m-0">
                     {adminEmail}
                   </p>
                 </div>
@@ -281,31 +294,39 @@ export default function AdminLayout() {
                 icon={<LogoutOutlined />}
                 onClick={handleLogout}
                 title="Logout"
-                className="text-text-secondary! hover:text-red-600! hover:bg-red-50!"
+                className="text-white/60! hover:text-rose-400! hover:bg-white/10!"
               />
             </div>
           </div>
         </aside>
 
-        <div className="lg:hidden bg-surface border-b border-border sticky top-0 z-50 px-4 py-3 flex items-center justify-between shadow-sm">
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-[#0e0e13] border-b border-white/10 sticky top-0 z-50 px-4 py-3.5 flex items-center justify-between shadow-lg">
           <div className="flex items-center gap-3">
             <Button
               type="text"
               shape="circle"
-              icon={<MenuOutlined className="text-lg" />}
+              icon={<MenuOutlined className="text-lg text-white" />}
               onClick={() => setMobileMenuOpen(true)}
               aria-label="Open sidebar menu"
+              className="text-white hover:bg-white/10!"
             />
             <Link to="/admin" className="flex items-center">
               <img
                 src={logo}
                 alt="shop."
-                className="h-6 w-auto object-contain"
+                className="h-6 w-auto object-contain brightness-0 invert"
               />
             </Link>
           </div>
 
           <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/10 border border-white/15 text-white mr-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="text-[10px] font-bold tracking-wider uppercase text-white/90">
+                Console
+              </span>
+            </div>
             <Dropdown menu={{ items: profileMenuItems }} trigger={["click"]}>
               <button
                 type="button"
@@ -313,11 +334,11 @@ export default function AdminLayout() {
                 aria-label="Admin Profile Menu"
               >
                 {user?.profilePhoto ? (
-                  <Avatar src={user.profilePhoto} size={32} />
+                  <Avatar src={user.profilePhoto} size={32} className="ring-2 ring-[#5433eb]/50" />
                 ) : (
                   <Avatar
                     size={32}
-                    className="bg-primary text-on-primary font-bold text-xs"
+                    className="bg-gradient-to-tr from-[#5433eb] to-[#7f5af0] text-white font-bold text-xs"
                   >
                     {adminInitials}
                   </Avatar>
@@ -327,15 +348,21 @@ export default function AdminLayout() {
           </div>
         </div>
 
+        {/* Mobile Drawer */}
         <Drawer
           open={mobileMenuOpen}
           onClose={() => setMobileMenuOpen(false)}
           placement="left"
           width={280}
-          closeIcon={<CloseOutlined className="text-text-secondary" />}
+          className="admin-dark-drawer"
+          styles={{
+            body: { backgroundColor: "#0e0e13", padding: "16px", color: "#ffffff" },
+            header: { backgroundColor: "#0e0e13", borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "16px" },
+          }}
+          closeIcon={<CloseOutlined className="text-white/70 hover:text-white" />}
           title={
             <div className="flex items-center">
-              <img src={logo} alt="shop." className="h-6 w-auto" />
+              <img src={logo} alt="shop." className="h-6 w-auto brightness-0 invert" />
             </div>
           }
         >
@@ -347,10 +374,10 @@ export default function AdminLayout() {
                   to={item.to}
                   end={item.end}
                   className={({ isActive }) =>
-                    `flex items-center px-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
+                    `flex items-center px-4 py-3 rounded-2xl text-sm font-semibold transition-all no-underline ${
                       isActive
-                        ? "bg-[#f0eded]! text-text-primary! font-bold! shadow-2xs!"
-                        : "text-text-secondary hover:bg-canvas hover:text-text-primary"
+                        ? "bg-[#5433eb]! text-white! font-bold! shadow-[0_4px_20px_rgba(84,51,235,0.4)]!"
+                        : "text-white/65! hover:text-white! hover:bg-white/6!"
                     }`
                   }
                 >
@@ -361,38 +388,40 @@ export default function AdminLayout() {
                 </NavLink>
               ))}
 
-              <div className="pt-4 mt-4 border-t border-border">
+              <div className="pt-4 mt-4 border-t border-white/10">
                 <Link
                   to="/"
-                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-3 px-4 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/5 rounded-2xl no-underline"
                 >
-                  <ShopOutlined className="text-base" />
+                  <ShopOutlined className="text-base text-[#a594fd]" />
                   <span>Customer Storefront</span>
                 </Link>
               </div>
             </nav>
 
-            <div className="p-3 border-t border-border bg-canvas rounded-2xl flex items-center justify-between">
-              <div className="flex items-center gap-2">
+            <div className="p-3 border border-white/10 bg-[#0a0a0e] rounded-2xl flex items-center justify-between">
+              <div className="flex items-center gap-2 min-w-0">
                 <Avatar
                   size={34}
-                  className="bg-primary text-on-primary font-bold text-xs"
+                  className="bg-gradient-to-tr from-[#5433eb] to-[#7f5af0] text-white font-bold text-xs"
                 >
                   {adminInitials}
                 </Avatar>
-                <div className="leading-tight">
-                  <p className="text-xs font-bold text-text-primary">
+                <div className="leading-tight min-w-0">
+                  <p className="text-xs font-bold text-white truncate m-0">
                     {adminName}
                   </p>
-                  <p className="text-[10px] text-text-secondary">Store Admin</p>
+                  <p className="text-[10px] text-white/50 truncate m-0">Store Admin</p>
                 </div>
               </div>
               <Button
-                type="link"
+                type="text"
                 size="small"
                 danger
                 onClick={handleLogout}
-                className="font-semibold text-xs! p-0!"
+                className="font-semibold text-xs! text-rose-400! hover:text-rose-300! p-0!"
               >
                 Logout
               </Button>

@@ -6,6 +6,7 @@ import {
   CheckCircleFilled,
   ClockCircleOutlined,
   DollarOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   getAllPaymentsApi,
@@ -104,77 +105,89 @@ export default function AdminPayments() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
             Payments &amp; Settlements
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary mt-1">
-            Real-time ledger of store revenue, payments received, and pending
-            COD settlements.
+          <p className="text-xs text-text-secondary mt-1 m-0">
+            Real-time ledger of store revenue, payments received, and pending COD settlements.
           </p>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Button
+            icon={<ReloadOutlined className={loading ? "animate-spin" : ""} />}
+            onClick={fetchPaymentsData}
+            loading={loading}
+            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
+          >
+            Refresh Ledger
+          </Button>
         </div>
       </div>
 
+      {/* 4 Modern Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
               TOTAL COLLECTED
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
               <CheckCircleFilled className="text-[9px]" /> Verified
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               ${Number(totalCollected).toFixed(2)}
             </h2>
-            <p className="text-xs text-text-secondary mt-1 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Gross fulfilled order settlements
             </p>
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
               PENDING SETTLEMENT
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-700">
               <ClockCircleOutlined className="text-[9px]" /> In Flow
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               ${Number(pendingSettlement).toFixed(2)}
             </h2>
-            <p className="text-xs text-text-secondary mt-1 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Cash due upon courier arrival
             </p>
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
               TOTAL TRANSACTIONS
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-50 text-[#5433eb]">
               Live
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {payments.length}
             </h2>
-            <p className="text-xs text-text-secondary mt-1 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Total customer orders processed
             </p>
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
               PAID RATIO
@@ -189,19 +202,19 @@ export default function AdminPayments() {
                 : "100%"}
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {payments.filter((p) => p.paymentStatus === "PAID").length} /{" "}
               {payments.length}
             </h2>
-            <p className="text-xs text-text-secondary mt-1 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Orders fully settled
             </p>
           </div>
         </div>
       </div>
 
-      <div className="bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1 space-y-4">
+      <div className="bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-sm">
             <Input

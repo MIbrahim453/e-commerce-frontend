@@ -188,6 +188,7 @@ export default function AdminCategories() {
           subtext="Syncing taxonomy and storefront tags in real-time..."
         />
       )}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary flex-wrap">
@@ -204,18 +205,16 @@ export default function AdminCategories() {
             <span>&gt;</span>
             <span className="text-text-primary">Categories</span>
           </div>
-          <div className="flex items-center gap-3 mt-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+          <div className="flex items-center gap-2.5 mt-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
               Category Management
             </h1>
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
-              Taxonomy & Tags
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20 shrink-0 whitespace-nowrap">
+              Taxonomy &amp; Tags
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1 max-w-2xl">
-            Create, structure, and curate product classifications across Men's,
-            Women's, and Kids' departments with automatic URL slugs and
-            storefront synchronization.
+          <p className="text-xs text-text-secondary mt-1 max-w-2xl m-0">
+            Create, structure, and curate product classifications across Men, Women, and Kids collections with automatic URL slugs.
           </p>
         </div>
 
@@ -233,7 +232,7 @@ export default function AdminCategories() {
             <Button
               type="primary"
               icon={<PlusOutlined />}
-              className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-5! flex! items-center! gap-2!"
+              className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
             >
               Add New Product
             </Button>
@@ -251,7 +250,7 @@ export default function AdminCategories() {
               <TagsOutlined />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary mt-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-text-primary mt-2 m-0">
             {totalCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
@@ -276,7 +275,7 @@ export default function AdminCategories() {
               <ManOutlined />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-indigo-600 mt-2 m-0">
             {menCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
@@ -304,7 +303,7 @@ export default function AdminCategories() {
               <WomanOutlined />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-pink-600 mt-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-pink-600 mt-2 m-0">
             {womenCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">
@@ -332,7 +331,7 @@ export default function AdminCategories() {
               <SmileOutlined />
             </div>
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-2">
+          <h2 className="text-xl sm:text-2xl font-bold text-amber-600 mt-2 m-0">
             {kidsCount}
           </h2>
           <p className="text-xs text-text-secondary mt-1 font-medium">

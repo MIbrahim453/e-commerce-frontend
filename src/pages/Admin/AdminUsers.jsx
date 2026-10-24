@@ -192,21 +192,22 @@ export default function AdminUsers() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
-      {/* Header */}
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
             User Management
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary mt-1">
+          <p className="text-xs sm:text-sm text-text-secondary mt-1 m-0">
             Manage all registered users, roles, and account details.
           </p>
         </div>
         <div className="flex items-center gap-3">
           <Button
-            icon={<ReloadOutlined />}
+            icon={<ReloadOutlined className={loading ? "animate-spin" : ""} />}
             onClick={fetchData}
-            className="rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-text-primary! hover:bg-canvas! h-auto! py-2.5! px-4! border border-border!"
+            loading={loading}
+            className="rounded-full! text-xs! font-semibold! text-text-secondary! hover:text-text-primary! hover:bg-canvas! h-auto! py-2! px-4! border border-border!"
           >
             Refresh
           </Button>
@@ -214,7 +215,7 @@ export default function AdminUsers() {
             type="primary"
             icon={<PlusOutlined className="text-sm" />}
             onClick={openCreateModal}
-            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-5! flex! items-center! gap-2!"
+            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
           >
             Add User
           </Button>
@@ -222,25 +223,25 @@ export default function AdminUsers() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               TOTAL USERS
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
               <TeamOutlined className="text-[10px]" /> All
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {stats?.totalUsers ?? users.length}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Registered accounts
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={100}
               showInfo={false}
@@ -250,24 +251,24 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               ADMIN USERS
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
               <CrownOutlined className="text-[10px]" /> Elevated
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {stats?.adminUsers ?? 0}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               With admin privileges
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={
                 stats?.totalUsers
@@ -281,24 +282,24 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               REGULAR USERS
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
               <UserOutlined className="text-[10px]" /> Standard
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {stats?.regularUsers ?? 0}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Customer accounts
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={
                 stats?.totalUsers
@@ -312,24 +313,24 @@ export default function AdminUsers() {
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               NEW THIS MONTH
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-[#5433eb]">
               <UserAddOutlined className="text-[10px]" /> Recent
             </span>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {stats?.newUsersThisMonth ?? 0}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Joined this month
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={
                 stats?.totalUsers

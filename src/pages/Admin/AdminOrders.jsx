@@ -8,6 +8,7 @@ import {
   EnvironmentOutlined,
   ShoppingOutlined,
   EditOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import {
   getAllOrdersApi,
@@ -295,10 +296,11 @@ export default function AdminOrders() {
         />
       )}
 
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
               Orders &amp; Fulfillment
             </h1>
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -309,7 +311,7 @@ export default function AdminOrders() {
         </div>
 
         <div className="flex items-center gap-2.5 flex-wrap">
-          <div className="flex items-center gap-1.5 px-3 py-2 bg-surface rounded-full border border-border text-xs font-semibold text-text-primary shadow-2xs">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 bg-surface rounded-full border border-border text-xs font-semibold text-text-primary shadow-2xs">
             <CalendarOutlined className="text-text-secondary" />
             <span>
               {new Date().toLocaleDateString("en-US", {
@@ -319,9 +321,19 @@ export default function AdminOrders() {
               })}
             </span>
           </div>
+
+          <Button
+            icon={<ReloadOutlined className={loading ? "animate-spin" : ""} />}
+            onClick={fetchOrders}
+            loading={loading}
+            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
+          >
+            Sync Orders
+          </Button>
         </div>
       </div>
 
+      {/* Modern Filter Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         {tabs.map((tab) => {
           const isActive = activeTab === tab.label;
@@ -330,17 +342,19 @@ export default function AdminOrders() {
               key={tab.label}
               type="button"
               onClick={() => setActiveTab(tab.label)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer border-0 ${isActive
-                  ? "bg-[#f0eded]! text-text-primary! font-bold! shadow-2xs!"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all whitespace-nowrap cursor-pointer border-0 ${
+                isActive
+                  ? "bg-[#0e0e13]! text-white! font-bold! shadow-sm!"
                   : "bg-surface text-text-secondary hover:text-text-primary border border-border"
-                }`}
+              }`}
             >
               <span>{tab.label}</span>
               <span
-                className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${isActive
-                    ? "bg-white text-text-primary shadow-2xs"
-                    : "bg-canvas text-text-primary"
-                  }`}
+                className={`text-[11px] px-2 py-0.5 rounded-full font-bold ${
+                  isActive
+                    ? "bg-[#5433eb] text-white"
+                    : "bg-[#f2f1f5] text-text-secondary"
+                }`}
               >
                 {tab.count}
               </span>
@@ -351,7 +365,7 @@ export default function AdminOrders() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div
-          className={`transition-all ${drawerOpen ? "lg:col-span-7" : "lg:col-span-12"} bg-surface rounded-card p-5 sm:p-6 border border-border shadow-level-1`}
+          className={`transition-all ${drawerOpen ? "lg:col-span-7" : "lg:col-span-12"} bg-surface rounded-2xl p-5 sm:p-6 border border-border shadow-xs`}
         >
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
             <div className="relative flex-1 max-w-sm">

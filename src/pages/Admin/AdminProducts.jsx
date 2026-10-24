@@ -305,6 +305,7 @@ export default function AdminProducts() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200 min-w-0">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-text-secondary">
@@ -314,17 +315,16 @@ export default function AdminProducts() {
             <span>&gt;</span>
             <span className="text-text-primary">Products Catalog</span>
           </div>
-          <div className="flex items-center gap-3 mt-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+          <div className="flex items-center gap-2.5 mt-1">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
               Products
             </h1>
-            <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20">
+            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-bold bg-primary/10 text-primary border border-primary/20">
               Live Catalog
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1 max-w-2xl">
-            Manage commercial values, warehouse stock, categories, and
-            marketplace tags with real-time stock sync.
+          <p className="text-xs text-text-secondary mt-1 max-w-2xl m-0">
+            Manage commercial values, warehouse stock, categories, and marketplace tags with real-time stock sync.
           </p>
         </div>
 
@@ -346,7 +346,7 @@ export default function AdminProducts() {
             type="primary"
             icon={<PlusOutlined className="text-sm" />}
             onClick={() => navigate("/admin/products/new")}
-            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-6! flex! items-center! gap-2!"
+            className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
           >
             Add New Product
           </Button>
@@ -356,23 +356,23 @@ export default function AdminProducts() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4">
         <div
           onClick={() => setStockFilter("all")}
-          className={`bg-surface rounded-card p-4 sm:p-5 border transition-all cursor-pointer shadow-level-1 ${stockFilter === "all"
-              ? "border-primary ring-2 ring-primary/20 bg-primary/5"
-              : "border-border hover:border-primary/40"
+          className={`bg-surface rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer shadow-xs ${stockFilter === "all"
+              ? "border-[#5433eb] ring-2 ring-[#5433eb]/20 bg-[#5433eb]/5"
+              : "border-border hover:border-[#5433eb]/40 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-text-secondary uppercase tracking-wider m-0">
               Total Catalog
             </p>
-            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center text-xs">
+            <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#5433eb] flex items-center justify-center text-xs">
               <ShoppingOutlined />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-text-primary mt-2">
+          <p className="text-lg sm:text-xl font-bold text-text-primary mt-2 m-0">
             {statsLoading ? "..." : `${stats.totalProducts} items`}
           </p>
-          <p className="text-[11px] text-text-secondary mt-0.5 font-medium">
+          <p className="text-[11px] text-text-secondary mt-1 font-medium m-0">
             Active products in database
           </p>
           <div className="mt-3">
@@ -380,7 +380,7 @@ export default function AdminProducts() {
               percent={100}
               showInfo={false}
               strokeColor="#5433eb"
-              size={["100%", 3]}
+              size={["100%", 4]}
             />
           </div>
         </div>
@@ -389,23 +389,23 @@ export default function AdminProducts() {
           onClick={() =>
             setStockFilter(stockFilter === "inStock" ? "all" : "inStock")
           }
-          className={`bg-surface rounded-card p-4 sm:p-5 border transition-all cursor-pointer shadow-level-1 ${stockFilter === "inStock"
+          className={`bg-surface rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer shadow-xs ${stockFilter === "inStock"
               ? "border-emerald-500 ring-2 ring-emerald-500/20 bg-emerald-50/40"
-              : "border-border hover:border-emerald-300"
+              : "border-border hover:border-emerald-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider m-0">
               In Stock
             </p>
             <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
               <CheckCircleOutlined />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-emerald-600 mt-2">
+          <p className="text-lg sm:text-xl font-bold text-emerald-600 mt-2 m-0">
             {statsLoading ? "..." : `${stats.inStockCount} available`}
           </p>
-          <p className="text-[11px] text-text-secondary mt-0.5 font-medium">
+          <p className="text-[11px] text-text-secondary mt-1 font-medium m-0">
             Ready for instant fulfillment
           </p>
           <div className="mt-3">
@@ -417,7 +417,7 @@ export default function AdminProducts() {
               }
               showInfo={false}
               strokeColor="#10b981"
-              size={["100%", 3]}
+              size={["100%", 4]}
             />
           </div>
         </div>
@@ -426,23 +426,23 @@ export default function AdminProducts() {
           onClick={() =>
             setStockFilter(stockFilter === "lowStock" ? "all" : "lowStock")
           }
-          className={`bg-surface rounded-card p-4 sm:p-5 border transition-all cursor-pointer shadow-level-1 ${stockFilter === "lowStock"
+          className={`bg-surface rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer shadow-xs ${stockFilter === "lowStock"
               ? "border-amber-500 ring-2 ring-amber-500/20 bg-amber-50/40"
-              : "border-border hover:border-amber-300"
+              : "border-border hover:border-amber-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-amber-700 uppercase tracking-wider m-0">
               Low Stock
             </p>
             <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
               <WarningOutlined />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-amber-600 mt-2">
+          <p className="text-lg sm:text-xl font-bold text-amber-600 mt-2 m-0">
             {statsLoading ? "..." : `${stats.lowStockCount} items`}
           </p>
-          <p className="text-[11px] text-text-secondary mt-0.5 font-medium">
+          <p className="text-[11px] text-text-secondary mt-1 font-medium m-0">
             Remaining stock ≤ 5 units
           </p>
           <div className="mt-3">
@@ -456,7 +456,7 @@ export default function AdminProducts() {
               }
               showInfo={false}
               strokeColor="#f59e0b"
-              size={["100%", 3]}
+              size={["100%", 4]}
             />
           </div>
         </div>
@@ -465,23 +465,23 @@ export default function AdminProducts() {
           onClick={() =>
             setStockFilter(stockFilter === "outOfStock" ? "all" : "outOfStock")
           }
-          className={`bg-surface rounded-card p-4 sm:p-5 border transition-all cursor-pointer shadow-level-1 ${stockFilter === "outOfStock"
+          className={`bg-surface rounded-2xl p-4 sm:p-5 border transition-all cursor-pointer shadow-xs ${stockFilter === "outOfStock"
               ? "border-rose-500 ring-2 ring-rose-500/20 bg-rose-50/40"
-              : "border-border hover:border-rose-300"
+              : "border-border hover:border-rose-300 hover:shadow-md"
             }`}
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-rose-700 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-rose-700 uppercase tracking-wider m-0">
               Out of Stock
             </p>
             <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs">
               <CloseCircleOutlined />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-rose-600 mt-2">
+          <p className="text-lg sm:text-xl font-bold text-rose-600 mt-2 m-0">
             {statsLoading ? "..." : `${stats.outOfStockCount} items`}
           </p>
-          <p className="text-[11px] text-text-secondary mt-0.5 font-medium">
+          <p className="text-[11px] text-text-secondary mt-1 font-medium m-0">
             Depleted inventory items
           </p>
           <div className="mt-3">
@@ -495,29 +495,29 @@ export default function AdminProducts() {
               }
               showInfo={false}
               strokeColor="#ef4444"
-              size={["100%", 3]}
+              size={["100%", 4]}
             />
           </div>
         </div>
 
         <Link
           to="/admin/categories"
-          className="col-span-2 sm:col-span-1 bg-surface rounded-card p-4 sm:p-5 border border-border hover:border-indigo-400 transition-all shadow-level-1 block group"
+          className="col-span-2 sm:col-span-1 bg-surface rounded-2xl p-4 sm:p-5 border border-border hover:border-[#5433eb] transition-all shadow-xs hover:shadow-md block group no-underline"
         >
           <div className="flex items-center justify-between">
-            <p className="text-[11px] font-bold text-indigo-700 uppercase tracking-wider">
+            <p className="text-[11px] font-bold text-[#5433eb] uppercase tracking-wider m-0">
               Categories
             </p>
-            <div className="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+            <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#5433eb] flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
               <TagsOutlined />
             </div>
           </div>
-          <p className="text-xl sm:text-2xl font-extrabold text-indigo-600 mt-2">
+          <p className="text-lg sm:text-xl font-bold text-[#5433eb] mt-2 m-0">
             {statsLoading ? "..." : `${stats.totalCategories} active`}
           </p>
-          <p className="text-[11px] text-text-secondary mt-0.5 font-medium flex items-center justify-between">
+          <p className="text-[11px] text-text-secondary mt-1 font-medium flex items-center justify-between m-0">
             <span>Taxonomies linked</span>
-            <span className="text-primary font-bold text-[10px] group-hover:underline">
+            <span className="text-[#5433eb] font-bold text-[10px] group-hover:underline">
               Manage &rarr;
             </span>
           </p>
@@ -525,8 +525,8 @@ export default function AdminProducts() {
             <Progress
               percent={100}
               showInfo={false}
-              strokeColor="#4f46e5"
-              size={["100%", 3]}
+              strokeColor="#5433eb"
+              size={["100%", 4]}
             />
           </div>
         </Link>

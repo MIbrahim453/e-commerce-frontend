@@ -9,6 +9,9 @@ import {
   LoadingOutlined,
   ClockCircleOutlined,
   AppstoreOutlined,
+  ShopOutlined,
+  DollarCircleOutlined,
+  RiseOutlined,
 } from "@ant-design/icons";
 import {
   getAllOrdersApi,
@@ -80,14 +83,14 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary m-0">
             Store Overview &amp; Intelligence
           </h1>
-          <p className="text-xs sm:text-sm text-text-secondary mt-1">
-            Real-time financial performance, product analytics, and customer
-            activity.
+          <p className="text-xs text-text-secondary mt-1 m-0">
+            Real-time financial performance, product analytics, and customer activity.
           </p>
         </div>
 
@@ -96,7 +99,7 @@ export default function AdminDashboard() {
             <Button
               type="primary"
               icon={<PlusOutlined className="text-sm" />}
-              className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2.5! px-5! flex! items-center! gap-2!"
+              className="rounded-full! text-xs! font-bold! text-on-primary! bg-primary! hover:bg-primary/90! shadow-violet-glow! border-0! h-auto! py-2! px-4! flex! items-center! gap-2!"
             >
               Create new Product
             </Button>
@@ -104,25 +107,26 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+      {/* 4 Bento Metrics Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               TOTAL REVENUE
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-              <ArrowUpOutlined className="text-[10px]" /> Verified
-            </span>
+            <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#5433eb] flex items-center justify-center text-xs font-bold">
+              <DollarCircleOutlined />
+            </div>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               ${totalRev.toFixed(2)}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Gross fulfilled order settlements
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={Math.min(100, Math.round(totalRev / 10))}
               showInfo={false}
@@ -132,24 +136,24 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               ACTIVE ORDERS
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700">
-              <ClockCircleOutlined className="text-[10px]" /> In Process
-            </span>
+            <div className="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs font-bold">
+              <ClockCircleOutlined />
+            </div>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {activeOrdersCount} {activeOrdersCount === 1 ? "order" : "orders"}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Awaiting shipment fulfillment
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={
                 totalOrdersCount > 0
@@ -157,58 +161,57 @@ export default function AdminDashboard() {
                   : 0
               }
               showInfo={false}
-              strokeColor="#413787"
+              strokeColor="#f59e0b"
               size={["100%", 4]}
             />
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               AVERAGE ORDER VALUE
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700">
-              ${avgOrderValue}
-            </span>
+            <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs font-bold">
+              <RiseOutlined />
+            </div>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               ${avgOrderValue}
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Across {totalOrdersCount} store orders
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={55}
               showInfo={false}
-              strokeColor="#1a1a1a"
+              strokeColor="#10b981"
               size={["100%", 4]}
             />
           </div>
         </div>
 
-        <div className="bg-surface rounded-card p-6 border border-border shadow-level-1">
+        <div className="bg-surface rounded-2xl p-5 border border-border shadow-xs hover:shadow-sm transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold tracking-wider text-text-secondary uppercase">
+            <span className="text-[11px] font-semibold tracking-wider text-text-secondary uppercase">
               CATALOG INVENTORY
             </span>
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-[#5433eb]">
-              <AppstoreOutlined className="text-[10px]" />
-              Live
-            </span>
+            <div className="w-7 h-7 rounded-lg bg-purple-50 text-[#5433eb] flex items-center justify-center text-xs font-bold">
+              <AppstoreOutlined />
+            </div>
           </div>
-          <div className="mt-3">
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-text-primary tracking-tight">
+          <div className="mt-2.5">
+            <h2 className="text-xl sm:text-2xl font-bold text-text-primary tracking-tight m-0">
               {productStats?.totalProducts ?? 0} Products
             </h2>
-            <p className="text-xs text-text-secondary mt-1.5 font-medium">
+            <p className="text-xs text-text-secondary mt-1 font-medium m-0">
               Across {productStats?.totalCategories ?? 0} active categories
             </p>
           </div>
-          <div className="mt-4">
+          <div className="mt-3.5">
             <Progress
               percent={
                 productStats?.totalProducts > 0
@@ -227,7 +230,8 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      <div className="bg-surface rounded-card border border-border shadow-level-1 overflow-hidden">
+      {/* Activity Table Container */}
+      <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
         <div className="p-5 sm:p-6 border-b border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="text-base sm:text-lg font-bold text-text-primary m-0">
@@ -238,16 +242,17 @@ export default function AdminDashboard() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 bg-[#f4f3f6] p-1 rounded-full border border-black/5">
             {["All", "Paid", "Pending"].map((tab) => (
               <button
                 key={tab}
                 type="button"
                 onClick={() => setActiveTab(tab)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-all ${activeTab === tab
-                    ? "bg-[#1a1a1a] text-white border-transparent"
-                    : "bg-surface text-text-secondary border-border hover:bg-canvas"
-                  }`}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer border-0 transition-all ${
+                  activeTab === tab
+                    ? "bg-[#0e0e13] text-white shadow-sm font-bold"
+                    : "bg-transparent text-text-secondary hover:text-text-primary"
+                }`}
               >
                 {tab}
               </button>

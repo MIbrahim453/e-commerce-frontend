@@ -498,7 +498,7 @@ export default function AdminEditProduct() {
           </div>
 
           <div className="flex items-center gap-3 mt-1.5">
-            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-text-primary truncate max-w-xl">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-text-primary truncate max-w-xl m-0">
               Edit: {formData.name || "Product"}
             </h1>
           </div>
