@@ -263,8 +263,18 @@ export default function TrendingProducts() {
                     </span>
 
                     <div className="flex! items-center! gap-1! font-bold! text-[#1a1a1a]!">
-                      <StarFilled className="text-amber-400! text-[10px]!" />
-                      <span>{Number(product.averageRating || 5.0).toFixed(1)}</span>
+                      <StarFilled
+                        className={
+                          product.totalReviews > 0
+                            ? "text-amber-400! text-[10px]!"
+                            : "text-gray-300! text-[10px]!"
+                        }
+                      />
+                      <span>
+                        {product.totalReviews > 0
+                          ? Number(product.averageRating || 0).toFixed(1)
+                          : "0.0"}
+                      </span>
                       {product.totalReviews > 0 && (
                         <span className="text-text-secondary! font-normal! text-[10px]!">
                           ({product.totalReviews})

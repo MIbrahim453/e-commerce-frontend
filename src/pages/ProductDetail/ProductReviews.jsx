@@ -185,13 +185,13 @@ export default function ProductReviews({
 
         <div className="flex! items-center! gap-4! bg-[#faf8ff]! border! border-purple-100! rounded-2xl! px-5! py-3!">
           <div className="text-3xl! font-extrabold! text-[#5433eb]!">
-            {averageRating > 0 ? averageRating.toFixed(1) : "5.0"}
+            {totalReviews > 0 ? averageRating.toFixed(1) : "0.0"}
           </div>
           <div className="flex! flex-col!">
             <Rate
               disabled
               allowHalf
-              value={averageRating > 0 ? averageRating : 5}
+              value={totalReviews > 0 ? averageRating : 0}
               className="text-[#f59e0b]! text-sm!"
             />
             <span className="text-xs! text-gray-500! mt-0.5!">
