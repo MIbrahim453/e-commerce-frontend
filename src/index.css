@@ -23,3 +23,29 @@
   --shadow-level-1: 0px 4px 6px -1px rgba(0, 0, 0, 0.06), 0px 2px 4px -2px rgba(0, 0, 0, 0.04);
   --shadow-violet-glow: 0px 4px 24px 0px rgba(69, 36, 219, 0.34);
 }
+
+/* Custom Sleek Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f2f4f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7c9cc;
+  border-radius: 9999px;
+  border: 1px solid #f2f4f5;
+  transition: background-color 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c7c9cc #f2f4f5;
+}

@@ -11,6 +11,7 @@ import ProductInfo from "./ProductInfo";
 import ProductSpecs from "./ProductSpecs";
 import SimilarProducts from "./SimilarProducts";
 import { getSingleProductApi } from "../../services/productService";
+import { motion } from "framer-motion";
 
 export default function ProductDetailPage() {
   const [searchParams] = useSearchParams();
@@ -105,13 +106,23 @@ export default function ProductDetailPage() {
         </div>
 
         <div className="grid! grid-cols-1! lg:grid-cols-12! gap-8! lg:gap-10! items-start!">
-          <div className="lg:col-span-7!">
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-7!"
+          >
             <ProductGallery product={product} />
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-5!">
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="lg:col-span-5!"
+          >
             <ProductInfo product={product} />
-          </div>
+          </motion.div>
         </div>
 
         <div className="pt-2!">

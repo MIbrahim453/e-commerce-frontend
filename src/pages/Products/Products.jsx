@@ -13,6 +13,7 @@ import {
   getNewProductsApi,
   getProductsByCollectionApi,
 } from "../../services/productService";
+import { motion } from "framer-motion";
 
 export default function Products({
   selectedCollection = "",
@@ -327,9 +328,12 @@ export default function Products({
           const productImage = product.thumbnail || product.images?.[0];
 
           return (
-            <div
+            <motion.div
               key={productId}
-              className="bg-white! rounded-[24px]! border! border-[#ebebeb]! p-3! hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]! hover:border-gray-300! transition-all! duration-300! flex! flex-col! justify-between! group!"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.35 }}
+              className="bg-white! rounded-[24px]! border! border-[#ebebeb]! p-3.5! hover:shadow-[0_12px_32px_rgba(0,0,0,0.06)]! hover:border-gray-300! transition-all! duration-300! flex! flex-col! justify-between! group!"
             >
               <div className="relative! w-full! aspect-[4/3]! rounded-[18px]! overflow-hidden! bg-[#f5f6f8]! flex! items-center! justify-center!">
                 {hasDiscount && (
@@ -438,7 +442,7 @@ export default function Products({
                   </Link>
                 </div>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

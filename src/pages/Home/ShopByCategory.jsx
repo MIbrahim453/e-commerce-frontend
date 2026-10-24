@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRightOutlined } from "@ant-design/icons";
+import { ArrowRightOutlined, CompassFilled } from "@ant-design/icons";
 import tshirtsImg from "../../assets/images/category_tshirts.jpg";
 import jeansImg from "../../assets/images/category_jeans.jpg";
 import jacketsImg from "../../assets/images/category_jackets.jpg";
@@ -9,32 +9,40 @@ import { getCategoriesApi } from "../../services/productService";
 
 const fallbackCategories = [
   {
-    id: "1",
-    name: "T-Shirts & Tops",
-    count: "Casual Essentials",
-    image: tshirtsImg,
-  },
-  {
-    id: "2",
-    name: "Denim & Jeans",
-    count: "Classic Fits",
-    image: jeansImg,
-  },
-  {
-    id: "3",
+    id: "cat-jackets",
     name: "Jackets & Outerwear",
-    count: "Layering Staples",
+    subtitle: "Architectural layering and climate-engineered wools.",
+    count: "38 Styles",
     image: jacketsImg,
+    featured: true,
   },
   {
-    id: "4",
-    name: "Shoes & Footwear",
-    count: "Everyday Comfort",
+    id: "cat-denim",
+    name: "Denim & Raw Selvedge",
+    subtitle: "Custom 14oz Japanese milled denim.",
+    count: "24 Styles",
+    image: jeansImg,
+    featured: false,
+  },
+  {
+    id: "cat-tshirts",
+    name: "Heavyweight T-Shirts & Tops",
+    subtitle: "280 GSM combed organic cotton silhouettes.",
+    count: "42 Styles",
+    image: tshirtsImg,
+    featured: false,
+  },
+  {
+    id: "cat-shoes",
+    name: "Footwear & Leather Goods",
+    subtitle: "Artisan Tuscan suede and ergonomic soles.",
+    count: "19 Styles",
     image: shoesImg,
+    featured: false,
   },
 ];
 
-const sampleImages = [tshirtsImg, jeansImg, jacketsImg, shoesImg];
+const sampleImages = [jacketsImg, jeansImg, tshirtsImg, shoesImg];
 
 const toTitleCase = (str) =>
   str
@@ -44,46 +52,23 @@ const toTitleCase = (str) =>
 const getCategoryImage = (categoryName, index) => {
   if (!categoryName) return sampleImages[index % sampleImages.length];
   const lower = categoryName.toLowerCase();
-  if (
-    lower.includes("t-shirt") ||
-    lower.includes("shirt") ||
-    lower.includes("top") ||
-    lower.includes("tee")
-  ) {
-    return tshirtsImg;
-  }
-  if (
-    lower.includes("jean") ||
-    lower.includes("denim") ||
-    lower.includes("pant") ||
-    lower.includes("trouser") ||
-    lower.includes("bottom")
-  ) {
-    return jeansImg;
-  }
-  if (
-    lower.includes("jacket") ||
-    lower.includes("coat") ||
-    lower.includes("outerwear") ||
-    lower.includes("hoodie") ||
-    lower.includes("winter")
-  ) {
+  if (lower.includes("jacket") || lower.includes("coat") || lower.includes("outerwear")) {
     return jacketsImg;
   }
-  if (
-    lower.includes("shoe") ||
-    lower.includes("footwear") ||
-    lower.includes("sneaker") ||
-    lower.includes("boot") ||
-    lower.includes("sandal")
-  ) {
+  if (lower.includes("jean") || lower.includes("denim") || lower.includes("pant")) {
+    return jeansImg;
+  }
+  if (lower.includes("t-shirt") || lower.includes("shirt") || lower.includes("top")) {
+    return tshirtsImg;
+  }
+  if (lower.includes("shoe") || lower.includes("footwear") || lower.includes("sneaker")) {
     return shoesImg;
   }
   return sampleImages[index % sampleImages.length];
 };
 
 function ShopByCategory() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(fallbackCategories);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -95,74 +80,143 @@ function ShopByCategory() {
             return {
               id: cat._id,
               name,
+              subtitle:
+                idx === 0
+                  ? "Architectural layering and climate-engineered wools."
+                  : "Everyday artisan craftsmanship.",
+              count: `${Math.floor(20 + idx * 8)} Styles`,
               image: getCategoryImage(name, idx),
-              slug: cat.slug || cat.name,
+              featured: idx === 0,
             };
           });
           setCategories(fetched);
-        } else {
-          setCategories(fallbackCategories);
         }
       } catch (err) {
-        console.error("Failed to load categories:", err);
-        setCategories(fallbackCategories);
+        console.warn("Failed to load categories, using curated lookbook:", err);
       }
     };
 
     fetchCategories();
   }, []);
 
-  const displayList = categories.length > 0 ? categories : fallbackCategories;
+  const featuredCategory = categories[0] || fallbackCategories[0];
+  const secondaryCategories = categories.slice(1, 4);
+  if (secondaryCategories.length < 3) {
+    secondaryCategories.push(...fallbackCategories.slice(1, 4 - secondaryCategories.length));
+  }
 
   return (
-    <section className="w-full! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! sm:py-12!">
-      <div className="flex! flex-col! sm:flex-row! sm:items-baseline! justify-between! gap-2! mb-6! sm:mb-8!">
-        <div className="flex! items-baseline! gap-3! sm:gap-4!">
-          <h2 className="text-2xl! sm:text-3xl! font-semibold! text-text-primary! tracking-[-0.031em]! m-0!">
-            Shop by Category
+    <section className="w-full! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-10! sm:py-14!">
+      {/* Editorial Header */}
+      <div className="flex! flex-col! md:flex-row! md:items-end! justify-between! gap-4! mb-8!">
+        <div>
+          <div className="inline-flex! items-center! gap-1.5! px-3! py-1! rounded-full! bg-white! border! border-border! text-[#5433eb]! text-[11px]! font-bold! tracking-wider! uppercase! mb-2.5! shadow-2xs!">
+            <CompassFilled className="text-xs!" />
+            <span>Seasonal Architecture</span>
+          </div>
+          <h2 className="text-2xl! sm:text-3xl! lg:text-4xl! font-bold! text-text-primary! tracking-[-0.03em]! m-0!">
+            Curated Category Lookbooks
           </h2>
-          <Link
-            to="/products"
-            className="text-primary! hover:text-primary/80! text-xs! sm:text-sm! font-medium! tracking-[-0.02em]! inline-flex! items-center! gap-1! transition-colors!"
-          >
-            <span>Explore all</span>
-            <span>›</span>
-          </Link>
+          <p className="text-text-secondary! text-xs! sm:text-sm! m-0! mt-1.5! font-normal!">
+            Explore core capsules organized by silhouette, material origin, and daily function.
+          </p>
         </div>
-        <p className="text-text-secondary! text-xs! sm:text-sm! font-normal! m-0! tracking-[-0.01em]!">
-          Curated essentials designed for everyday style and comfort
-        </p>
+
+        <Link
+          to="/products"
+          className="text-[#5433eb]! hover:text-[#4324d4]! text-xs! sm:text-sm! font-bold! inline-flex! items-center! gap-1.5! transition-all! no-underline!"
+        >
+          <span>View All Categories</span>
+          <ArrowRightOutlined className="text-[11px]!" />
+        </Link>
       </div>
 
-      <div className="grid! grid-cols-1! sm:grid-cols-2! lg:grid-cols-4! gap-5! sm:gap-6!">
-        {displayList.map((cat) => (
+      {/* Asymmetric Editorial Bento Grid */}
+      <div className="grid! grid-cols-1! lg:grid-cols-12! gap-5! sm:gap-6!">
+        {/* Large Featured Category Bento Card (Spans 6 cols on lg) */}
+        <div className="lg:col-span-6!">
           <Link
-            key={cat.id || cat.name}
-            to={`/products?category=${encodeURIComponent(cat.name)}`}
-            className="no-underline! group!"
+            to={`/products?category=${encodeURIComponent(featuredCategory.name)}`}
+            className="no-underline! group! block! h-full!"
           >
-            <div className="bg-surface! rounded-card! p-3.5! sm:p-4! shadow-level-1! border! border-border! flex! flex-col! justify-between! transition-all! duration-300! hover:-translate-y-1! cursor-pointer! h-full!">
-              <div className="w-full! aspect-4/3! sm:aspect-square! rounded-media! overflow-hidden! bg-canvas!">
-                <img
-                  src={cat.image}
-                  alt={cat.name}
-                  className="w-full! h-full! object-cover! object-center! transition-transform! duration-500! group-hover:scale-105!"
-                />
-              </div>
-              <div className="flex! items-center! justify-between! pt-3.5! px-1! pb-1!">
-                <div className="flex! flex-col! gap-0.5!">
-                  <h3 className="text-title-md! font-semibold! text-text-primary! tracking-[-0.031em]! m-0! group-hover:text-primary! transition-colors!">
-                    {cat.name}
-                  </h3>
-                </div>
+            <div className="relative! h-full! min-h-[380px]! sm:min-h-[460px]! rounded-card! overflow-hidden! shadow-level-1! border! border-border! flex! flex-col! justify-between! p-6! sm:p-8!">
+              {/* Background Image with Zoom */}
+              <img
+                src={featuredCategory.image}
+                alt={featuredCategory.name}
+                className="absolute! inset-0! w-full! h-full! object-cover! object-center! transition-transform! duration-700! ease-out! group-hover:scale-106!"
+              />
 
-                <div className="w-8! h-8! rounded-full! bg-canvas! group-hover:bg-primary! group-hover:text-on-primary! text-text-primary! flex! items-center! justify-center! transition-all! shadow-xs!">
-                  <ArrowRightOutlined className="text-xs! transition-transform! group-hover:translate-x-0.5!" />
+              {/* Gradient Scrim */}
+              <div className="absolute! inset-0! bg-gradient-to-t! from-black/90! via-black/40! to-black/10! transition-opacity! group-hover:opacity-90!" />
+
+              {/* Top Tag */}
+              <div className="relative! z-10! flex! items-center! justify-between!">
+                <span className="px-3! py-1! rounded-full! bg-white/20! backdrop-blur-md! text-white! text-xs! font-bold! tracking-wider! uppercase! border! border-white/20!">
+                  Headline Capsule
+                </span>
+                <span className="text-white/80! text-xs! font-semibold!">
+                  {featuredCategory.count}
+                </span>
+              </div>
+
+              {/* Bottom Content */}
+              <div className="relative! z-10! flex! flex-col! gap-2!">
+                <h3 className="text-2xl! sm:text-3xl! font-extrabold! text-white! m-0! tracking-tight! leading-tight!">
+                  {featuredCategory.name}
+                </h3>
+                <p className="text-white/80! text-xs! sm:text-sm! m-0! max-w-md! line-clamp-2!">
+                  {featuredCategory.subtitle}
+                </p>
+                <div className="pt-2! inline-flex! items-center! gap-2! text-white! font-bold! text-xs! sm:text-sm! group-hover:text-[#a594fd]! transition-colors!">
+                  <span>Explore Collection</span>
+                  <ArrowRightOutlined className="text-xs! transition-transform! group-hover:translate-x-1!" />
                 </div>
               </div>
             </div>
           </Link>
-        ))}
+        </div>
+
+        {/* Right 3 Stacked / Split Categories (Spans 6 cols on lg) */}
+        <div className="lg:col-span-6! flex! flex-col! gap-5! sm:gap-6!">
+          {secondaryCategories.map((cat, idx) => (
+            <Link
+              key={cat.id || idx}
+              to={`/products?category=${encodeURIComponent(cat.name)}`}
+              className="no-underline! group! block! flex-1!"
+            >
+              <div className="relative! h-full! min-h-[140px]! sm:min-h-[155px]! rounded-card! overflow-hidden! shadow-level-1! border! border-border! flex! items-center! justify-between! p-5! sm:p-6!">
+                {/* Background Image with Zoom */}
+                <img
+                  src={cat.image}
+                  alt={cat.name}
+                  className="absolute! inset-0! w-full! h-full! object-cover! object-center! transition-transform! duration-700! ease-out! group-hover:scale-108!"
+                />
+
+                {/* Dark Vignette Overlay */}
+                <div className="absolute! inset-0! bg-gradient-to-r! from-black/90! via-black/60! to-black/20! transition-opacity! group-hover:opacity-90!" />
+
+                {/* Content */}
+                <div className="relative! z-10! flex! flex-col! gap-1! max-w-[70%]!">
+                  <span className="text-[#a594fd]! text-[11px]! font-bold! tracking-wider! uppercase!">
+                    {cat.count}
+                  </span>
+                  <h3 className="text-lg! sm:text-xl! font-bold! text-white! m-0! tracking-tight! group-hover:text-white! transition-colors!">
+                    {cat.name}
+                  </h3>
+                  <p className="text-white/70! text-xs! m-0! hidden! sm:block! truncate!">
+                    {cat.subtitle}
+                  </p>
+                </div>
+
+                {/* Circle Arrow Button */}
+                <div className="relative! z-10! w-10! h-10! rounded-full! bg-white/20! group-hover:bg-[#5433eb]! text-white! backdrop-blur-md! border! border-white/25! flex! items-center! justify-center! transition-all! shadow-sm!">
+                  <ArrowRightOutlined className="text-xs! transition-transform! group-hover:translate-x-0.5!" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );

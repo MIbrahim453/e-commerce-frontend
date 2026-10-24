@@ -1,48 +1,59 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import {
   LeftOutlined,
   RightOutlined,
   ArrowRightOutlined,
   ReloadOutlined,
-  FireOutlined,
+  FireFilled,
   StarFilled,
+  ShoppingOutlined,
+  CheckOutlined,
 } from "@ant-design/icons";
-import { getTrendingProductsApi } from "../../services/productService";
+import { motion } from "framer-motion";
+import { message } from "antd";
+import { getTrendingProductsApi, getProductsApi } from "../../services/productService";
+import { CartContext } from "../../context/cartContext";
 
 export default function TrendingProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [addedAnimation, setAddedAnimation] = useState({});
+
+  const { addToCart } = useContext(CartContext) || {};
 
   const fetchTrending = async () => {
     try {
       setLoading(true);
-      const res = await getTrendingProductsApi();
-      let items = res?.data?.data?.products || [];
+      let items = [];
 
+      try {
+        const res = await getTrendingProductsApi();
+        if (res?.data?.data?.products?.length > 0) {
+          items = res.data.data.products;
+        }
+      } catch (e) {
+        console.warn("Trending API call fallback:", e);
+      }
+
+      // If no products marked trending specifically, fetch products from database
       if (items.length === 0) {
         try {
-          const raw = localStorage.getItem("products");
-          const all = raw ? JSON.parse(raw) : [];
-          const trendingFromCache = all.filter((p) => p.isTrending);
-          items =
-            trendingFromCache.length > 0 ? trendingFromCache : all.slice(0, 8);
+          const allRes = await getProductsApi();
+          const allProducts = allRes?.data?.data?.products || [];
+          const dbTrending = allProducts.filter((p) => p.isTrending);
+          items = dbTrending.length > 0 ? dbTrending : allProducts;
         } catch (e) {
-          console.error(e);
+          console.warn("Database products API fallback:", e);
         }
       }
 
+      // Strict enforcement: ONLY database products, NO curated mock fallbacks
       setProducts(items);
     } catch (err) {
-      console.error("Error fetching trending products:", err);
-      try {
-        const raw = localStorage.getItem("products");
-        const all = raw ? JSON.parse(raw) : [];
-        setProducts(all.slice(0, 8));
-      } catch (e) {
-        console.error(e);
-      }
+      console.error("Error fetching trending products from database:", err);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -52,7 +63,37 @@ export default function TrendingProducts() {
     fetchTrending();
   }, []);
 
-  const maxStartIndex = Math.max(0, products.length - 4);
+  const handleQuickAdd = (product, e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (addToCart) {
+      const pid = product._id || product.id;
+      const originalPrice = Number(product.price) || 0;
+      const discount = Number(product.discount) || 0;
+      const finalPrice = discount > 0 ? originalPrice * (1 - discount / 100) : originalPrice;
+
+      const success = addToCart(
+        product,
+        1,
+        product.details?.color || "Default",
+        product.details?.size || "M",
+        discount,
+        finalPrice
+      );
+
+      if (success !== false) {
+        setAddedAnimation((prev) => ({ ...prev, [pid]: true }));
+        message.success(`${product.name} added to bag!`);
+        setTimeout(() => {
+          setAddedAnimation((prev) => ({ ...prev, [pid]: false }));
+        }, 1800);
+      }
+    }
+  };
+
+  const filteredProducts = products;
+  const maxStartIndex = Math.max(0, filteredProducts.length - 4);
   const canSlidePrev = currentIndex > 0;
   const canSlideNext = currentIndex < maxStartIndex;
 
@@ -68,44 +109,42 @@ export default function TrendingProducts() {
     }
   };
 
-  const displayedProducts = products.slice(currentIndex, currentIndex + 4);
+  const displayedProducts = filteredProducts.slice(currentIndex, currentIndex + 4);
 
   return (
     <section
       id="trending-deals"
       className="w-full! max-w-7xl! mx-auto! px-4! sm:px-6! lg:px-8! py-8! sm:py-12!"
     >
-      <div className="flex! items-center! justify-between! mb-6! sm:mb-8!">
-        <div className="flex! items-baseline! gap-3! sm:gap-4!">
-          <div className="flex! items-center! gap-2!">
-            <FireOutlined className="text-xl! sm:text-2xl! text-amber-500!" />
-            <h2 className="text-2xl! sm:text-3xl! font-semibold! text-text-primary! tracking-[-0.031em]! m-0!">
-              Trending Deals
-            </h2>
+      {/* Section Header with Carousel Navigation (No category/filter tabs) */}
+      <div className="flex! items-center! justify-between! gap-4! mb-6! sm:mb-8!">
+        <div>
+          <div className="inline-flex! items-center! gap-1.5! px-3! py-1! rounded-full! bg-amber-50! border! border-amber-200! text-amber-700! text-[11px]! font-bold! tracking-wider! uppercase! mb-2!">
+            <FireFilled className="text-amber-500! text-xs!" />
+            <span>Trending Products</span>
           </div>
 
-          <Link
-            to="/products?filter=trending"
-            className="text-primary! hover:text-primary/80! text-xs! sm:text-sm! font-medium! tracking-[-0.02em]! inline-flex! items-center! gap-1! transition-colors! no-underline!"
-          >
-            <span>
-              View all {products.length > 0 ? `(${products.length})` : ""}
-            </span>
-            <span>›</span>
-          </Link>
+          <h2 className="text-2xl! sm:text-3xl! lg:text-4xl! font-bold! text-text-primary! tracking-[-0.03em]! m-0!">
+            Trending Now & Essential Drops
+          </h2>
+          <p className="text-text-secondary! text-xs! sm:text-sm! m-0! mt-1! font-normal!">
+            The most sought-after apparel and footwear of the current collection.
+          </p>
         </div>
 
-        {products.length > 4 && (
-          <div className="flex! items-center! gap-2!">
+        {/* Carousel Prev / Next Arrows */}
+        {filteredProducts.length > 4 && (
+          <div className="flex! items-center! gap-1.5! shrink-0!">
             <button
               type="button"
               aria-label="Previous slide"
               onClick={handlePrev}
               disabled={!canSlidePrev}
-              className={`w-8! h-8! sm:w-9! sm:h-9! rounded-full! border! border-border! flex! items-center! justify-center! transition-colors! cursor-pointer! ${canSlidePrev
-                  ? "bg-surface! text-text-primary! hover:bg-canvas!"
+              className={`w-9! h-9! rounded-full! border! border-border! flex! items-center! justify-center! transition-all! cursor-pointer! ${
+                canSlidePrev
+                  ? "bg-surface! text-text-primary! hover:bg-canvas! shadow-2xs!"
                   : "bg-canvas! text-gray-300! border-gray-200! cursor-not-allowed!"
-                }`}
+              }`}
             >
               <LeftOutlined className="text-xs!" />
             </button>
@@ -114,10 +153,11 @@ export default function TrendingProducts() {
               aria-label="Next slide"
               onClick={handleNext}
               disabled={!canSlideNext}
-              className={`w-8! h-8! sm:w-9! sm:h-9! rounded-full! border! border-border! flex! items-center! justify-center! transition-colors! cursor-pointer! ${canSlideNext
-                  ? "bg-surface! text-text-primary! hover:bg-canvas!"
+              className={`w-9! h-9! rounded-full! border! border-border! flex! items-center! justify-center! transition-all! cursor-pointer! ${
+                canSlideNext
+                  ? "bg-surface! text-text-primary! hover:bg-canvas! shadow-2xs!"
                   : "bg-canvas! text-gray-300! border-gray-200! cursor-not-allowed!"
-                }`}
+              }`}
             >
               <RightOutlined className="text-xs!" />
             </button>
@@ -125,17 +165,18 @@ export default function TrendingProducts() {
         )}
       </div>
 
-      {loading && products.length === 0 ? (
-        <div className="py-16! text-center! space-y-3!">
+      {/* Grid of Elevated Database Product Cards */}
+      {loading ? (
+        <div className="py-20! text-center! space-y-3!">
           <ReloadOutlined className="animate-spin! text-3xl! text-primary!" />
           <p className="text-xs! font-semibold! text-text-secondary!">
-            Loading trending products...
+            Loading products from database...
           </p>
         </div>
       ) : displayedProducts.length === 0 ? (
-        <div className="py-12! text-center! bg-surface! rounded-card! border! border-dashed! border-border!">
-          <p className="text-sm! font-medium! text-text-secondary!">
-            No trending products available right now.
+        <div className="py-16! text-center! bg-surface! rounded-2xl! border! border-border! p-8!">
+          <p className="text-sm! font-semibold! text-text-secondary! m-0!">
+            No products found in the database.
           </p>
         </div>
       ) : (
@@ -148,106 +189,155 @@ export default function TrendingProducts() {
             const discountedPrice = hasDiscount
               ? originalPrice * (1 - Number(product.discount) / 100)
               : originalPrice;
-            const tag = hasDiscount ? `-${product.discount}% OFF` : "TRENDING";
-            const subtitle =
-              product.category?.name ||
-              product.details?.color ||
-              "Studio Collection";
-            const productImage = product.thumbnail || product.images?.[0];
+            const isAdded = addedAnimation[productId];
+            const productImage = product.thumbnail || product.images?.[0] || "";
+            const categoryLabel = product.category?.name || "Trending";
 
             return (
-              <div
+              <motion.div
                 key={productId}
-                className="bg-surface! rounded-card! p-3.5! sm:p-4! shadow-level-1! border! border-border! flex! flex-col! justify-between! transition-all! duration-300! hover:-translate-y-1! group!"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.35 }}
+                className="bg-surface! rounded-card! p-3.5! sm:p-4! shadow-level-1! border! border-border! flex! flex-col! justify-between! transition-all! duration-300! hover:shadow-lg! hover:-translate-y-1.5! group! relative!"
               >
-                <div className="relative! w-full! aspect-4/3! sm:aspect-square! rounded-media! overflow-hidden! bg-canvas! flex! items-center! justify-center!">
+                {/* Product Media Container */}
+                <div className="relative! w-full! aspect-[4/4.5]! rounded-media! overflow-hidden! bg-[#f7f8fa]! flex! items-center! justify-center!">
+                  {/* ONLY Discount Badge allowed on product thumbnail image */}
                   {hasDiscount && (
-                    <span className="absolute! top-2.5! left-2.5! z-10! bg-white/95! backdrop-blur-xs! text-primary! text-[10px]! font-bold! px-2! py-0.5! rounded-full! shadow-xs! tracking-tight!">
+                    <span className="absolute! top-3! left-3! z-10! px-2.5! py-1! rounded-full! bg-white/95! backdrop-blur-md! text-[#5433eb]! text-[10px]! font-extrabold! tracking-wider! uppercase! shadow-xs! border! border-black/5!">
                       -{product.discount}%
                     </span>
                   )}
 
-                  {productImage ? (
-                    <img
-                      src={productImage}
-                      alt={product.name}
-                      className="w-full! h-full! object-cover! object-center! transition-transform! duration-500! group-hover:scale-105!"
-                    />
-                  ) : (
-                    <div className="w-full! h-full! flex! flex-col! items-center! justify-center! text-gray-400! text-xs! font-medium!">
-                      <span>No image</span>
-                    </div>
-                  )}
+                  {/* Product Image with Hover Zoom */}
+                  <Link
+                    to={`/product/${productSlug}`}
+                    className="w-full! h-full! block! overflow-hidden!"
+                  >
+                    {productImage ? (
+                      <img
+                        src={productImage}
+                        alt={product.name}
+                        className="w-full! h-full! object-cover! object-center! transition-transform! duration-700! ease-out! group-hover:scale-108!"
+                      />
+                    ) : (
+                      <div className="w-full! h-full! flex! items-center! justify-center! text-xs! text-gray-400!">
+                        No Image
+                      </div>
+                    )}
+                  </Link>
+
+                  {/* Floating Quick Add to Bag on Hover (Desktop) */}
+                  <div className="absolute! bottom-3! inset-x-3! z-10! opacity-0! group-hover:opacity-100! transition-all! duration-300! transform! translate-y-2! group-hover:translate-y-0!">
+                    <button
+                      type="button"
+                      onClick={(e) => handleQuickAdd(product, e)}
+                      className={`w-full! py-2.5! rounded-full! text-xs! font-bold! flex! items-center! justify-center! gap-2! shadow-md! transition-all! cursor-pointer! border-0! ${
+                        isAdded
+                          ? "bg-emerald-600! text-white!"
+                          : "bg-[#1a1a1a]! hover:bg-[#5433eb]! text-white!"
+                      }`}
+                    >
+                      {isAdded ? (
+                        <>
+                          <CheckOutlined className="text-xs!" />
+                          <span>Added to Bag</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingOutlined className="text-xs!" />
+                          <span>Quick Add to Bag</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
 
-                <div className="pt-3.5! px-1! pb-1! flex! flex-col! gap-1!">
-                  <div className="flex! items-center! justify-between! gap-2! text-[11px]!">
-                    <div className="flex! items-center! gap-1.5! flex-wrap!">
-                      <span className="px-1.5! py-0.5! rounded-md! bg-amber-50! text-amber-700! border! border-amber-200! font-bold! text-[9px]! uppercase! tracking-wide!">
-                        Trending
-                      </span>
-                      <span className="text-label-sm! text-text-secondary! font-normal! tracking-[-0.01em]! truncate!">
-                        {subtitle}
-                      </span>
-                    </div>
+                {/* Details Block */}
+                <div className="pt-3.5! px-1! pb-1! flex! flex-col! gap-1.5!">
+                  {/* Category & Ratings Micro-strip */}
+                  <div className="flex! items-center! justify-between! text-[11px]!">
+                    <span className="text-text-secondary! font-medium! tracking-tight! uppercase! text-[10px]!">
+                      {categoryLabel}
+                    </span>
 
-                    <div className="flex! items-center! gap-1! font-semibold! text-gray-700! shrink-0!">
-                      <StarFilled className="text-[#f59e0b]! text-[10px]!" />
-                      <span>
-                        {product.totalReviews > 0
-                          ? Number(product.averageRating).toFixed(1)
-                          : "New"}
-                      </span>
-                      {product.totalReviews > 0 ? (
-                        <span className="text-gray-400! font-normal!">
+                    <div className="flex! items-center! gap-1! font-bold! text-[#1a1a1a]!">
+                      <StarFilled className="text-amber-400! text-[10px]!" />
+                      <span>{Number(product.averageRating || 5.0).toFixed(1)}</span>
+                      {product.totalReviews > 0 && (
+                        <span className="text-text-secondary! font-normal! text-[10px]!">
                           ({product.totalReviews})
-                        </span>
-                      ) : (
-                        <span className="text-gray-400! font-normal! text-[10px]!">
-                          (0)
                         </span>
                       )}
                     </div>
                   </div>
 
+                  {/* Title */}
                   <Link
                     to={`/product/${productSlug}`}
-                    className="no-underline!"
+                    className="no-underline! group-hover:text-primary! transition-colors!"
                   >
                     <h3
                       title={product.name}
-                      className="text-title-md! font-semibold! text-text-primary! tracking-[-0.031em]! m-0! truncate! hover:text-primary! transition-colors!"
+                      className="text-title-md! font-bold! text-text-primary! tracking-tight! m-0! truncate! leading-snug!"
                     >
                       {product.name}
                     </h3>
                   </Link>
-                </div>
 
-                <div className="flex! items-center! justify-between! pt-2! px-1!">
-                  <div className="flex! items-baseline! gap-1.5!">
-                    <span className="text-title-md! sm:text-lg! font-semibold! text-text-primary! tracking-[-0.02em]!">
-                      ${discountedPrice.toFixed(2)}
-                    </span>
-                    {hasDiscount && (
-                      <span className="text-xs! sm:text-sm! text-text-secondary! line-through! font-normal!">
-                        ${originalPrice.toFixed(2)}
+                  {/* Color Swatch Dots */}
+                  {product.colors && product.colors.length > 0 && (
+                    <div className="flex! items-center! gap-1! pt-0.5!">
+                      {product.colors.map((hex, idx) => (
+                        <span
+                          key={idx}
+                          className="w-2.5! h-2.5! rounded-full! border! border-white! shadow-2xs!"
+                          style={{ backgroundColor: hex }}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Pricing & Direct Link Arrow */}
+                  <div className="flex! items-center! justify-between! pt-2! mt-1! border-t! border-border/70!">
+                    <div className="flex! items-baseline! gap-2!">
+                      <span className="text-base! sm:text-lg! font-extrabold! text-text-primary! tracking-tight!">
+                        ${discountedPrice.toFixed(2)}
                       </span>
-                    )}
-                  </div>
+                      {hasDiscount && (
+                        <span className="text-xs! text-text-secondary! line-through! font-medium!">
+                          ${originalPrice.toFixed(2)}
+                        </span>
+                      )}
+                    </div>
 
-                  <Link
-                    to={`/product/${productSlug}`}
-                    aria-label={`View ${product.name}`}
-                    className="w-8! h-8! rounded-full! bg-primary! hover:bg-primary/90! text-white! flex! items-center! justify-center! shadow-violet-glow! transition-transform! active:scale-95!"
-                  >
-                    <ArrowRightOutlined className="text-xs!" />
-                  </Link>
+                    <Link
+                      to={`/product/${productSlug}`}
+                      aria-label={`View ${product.name}`}
+                      className="w-8! h-8! rounded-full! bg-canvas! hover:bg-[#5433eb]! text-text-primary! hover:text-white! flex! items-center! justify-center! transition-all! shadow-2xs! cursor-pointer!"
+                    >
+                      <ArrowRightOutlined className="text-[11px]!" />
+                    </Link>
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
       )}
+
+      {/* Bottom Collection Banner Link */}
+      <div className="mt-8! text-center!">
+        <Link
+          to="/products"
+          className="inline-flex! items-center! gap-2! px-6! py-2.5! rounded-full! bg-surface! hover:bg-white! text-text-primary! hover:text-primary! border! border-border! text-xs! sm:text-sm! font-bold! shadow-xs! transition-all! no-underline!"
+        >
+          <span>Explore Entire Catalog</span>
+          <ArrowRightOutlined className="text-xs!" />
+        </Link>
+      </div>
     </section>
   );
 }

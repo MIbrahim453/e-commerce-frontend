@@ -16,6 +16,7 @@ import ShippingAddress from "./ShippingAddress";
 import DeliveryMethod from "./DeliveryMethod";
 import PaymentMethod from "./PaymentMethod";
 import OrderSummary from "./OrderSummary";
+import { motion } from "framer-motion";
 
 export default function CheckoutPage() {
   const navigate = useNavigate();
@@ -422,7 +423,12 @@ export default function CheckoutPage() {
         </div>
 
         <div className="grid! grid-cols-1! lg:grid-cols-12! gap-8! items-start!">
-          <div className="lg:col-span-7! xl:col-span-8! bg-white! rounded-[28px]! border! border-[#ebebeb]! p-5! sm:p-8! shadow-[0_4px_24px_rgba(0,0,0,0.03)]! flex! flex-col! gap-6! sm:gap-7!">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-7! xl:col-span-8! bg-white! rounded-[28px]! border! border-[#ebebeb]! p-5! sm:p-8! shadow-[0_4px_24px_rgba(0,0,0,0.03)]! flex! flex-col! gap-6! sm:gap-7!"
+          >
             <ContactInfo
               contactInfo={contactInfo}
               onChange={handleContactChange}
@@ -439,9 +445,14 @@ export default function CheckoutPage() {
               paymentMethod={paymentMethod}
               onChange={setPaymentMethod}
             />
-          </div>
+          </motion.div>
 
-          <div className="lg:col-span-5! xl:col-span-4!">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+            className="lg:col-span-5! xl:col-span-4!"
+          >
             <OrderSummary
               cart={cart}
               subTotal={subTotal}
@@ -454,7 +465,7 @@ export default function CheckoutPage() {
               submitting={submitting}
               onSubmitOrder={handleSubmitOrder}
             />
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

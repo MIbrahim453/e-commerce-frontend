@@ -12,6 +12,8 @@ const MAX_RECENT = 3;
 export default function NavSearchBar({
   autoFocus = false,
   onCloseMobile,
+  onSearchComplete,
+  onClose,
 }) {
   const [query, setQuery] = useState("");
   const [recentSearches, setRecentSearches] = useState([]);
@@ -21,13 +23,32 @@ export default function NavSearchBar({
   const navigate = useNavigate();
 
   useEffect(() => {
+    try {
+      const raw = localStorage.getItem("recent_searches");
+      if (raw) setRecentSearches(JSON.parse(raw));
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (autoFocus && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus]);
+
+  useEffect(() => {
     const handleClickOutside = (e) => {
       if (containerRef.current && !containerRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener("touchstart", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
   }, []);
 
   const getProducts = () => {
@@ -51,25 +72,36 @@ export default function NavSearchBar({
       .slice(0, 5)
     : [];
 
+  const handleClose = () => {
+    setIsOpen(false);
+    if (onCloseMobile) onCloseMobile();
+    if (onSearchComplete) onSearchComplete();
+    if (onClose) onClose();
+  };
+
   const executeSearch = (term) => {
     const value = (term || query).trim();
     if (!value) return;
 
     setRecentSearches((prev) => {
       const filtered = prev.filter((s) => s.toLowerCase() !== value.toLowerCase());
-      return [value, ...filtered].slice(0, MAX_RECENT);
+      const next = [value, ...filtered].slice(0, MAX_RECENT);
+      try {
+        localStorage.setItem("recent_searches", JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
     });
 
-    setIsOpen(false);
+    handleClose();
     setQuery(value);
-    if (onCloseMobile) onCloseMobile();
     navigate(`/catalog?q=${encodeURIComponent(value)}`);
   };
 
   const goToProduct = (product) => {
-    setIsOpen(false);
+    handleClose();
     setQuery("");
-    if (onCloseMobile) onCloseMobile();
     navigate(`/product/${product.slug || product._id}`);
   };
 
@@ -78,7 +110,9 @@ export default function NavSearchBar({
       e.preventDefault();
       executeSearch();
     }
-    if (e.key === "Escape") setIsOpen(false);
+    if (e.key === "Escape") {
+      handleClose();
+    }
   };
 
   const showDropdown = isOpen && trimmed.length > 0;
