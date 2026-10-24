@@ -2,6 +2,7 @@ import React from "react";
 import { Outlet } from "react-router-dom";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
+import AIStylistWidget from "../components/AIStylistWidget";
 
 export default function MainLayout() {
   return (
@@ -11,6 +12,7 @@ export default function MainLayout() {
         <Outlet />
       </main>
       <Footer />
+      <AIStylistWidget />
     </div>
   );
 }

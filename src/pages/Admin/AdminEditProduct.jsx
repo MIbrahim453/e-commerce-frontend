@@ -28,6 +28,7 @@ import {
   getCategoriesApi,
 } from "../../services/adminService";
 import Loader from "../../components/Loader";
+import AiProductGeneratorModal from "../../components/Admin/AiProductGeneratorModal";
 
 export default function AdminEditProduct() {
   const params = useParams();
@@ -37,6 +38,7 @@ export default function AdminEditProduct() {
 
   const [initialLoading, setInitialLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [productId, setProductId] = useState("");
   const [originalProduct, setOriginalProduct] = useState(null);
@@ -463,6 +465,32 @@ export default function AdminEditProduct() {
     }
   };
 
+  const handleApplyAiData = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      name: data.name || prev.name,
+      description: data.description || prev.description,
+      price: data.price || prev.price,
+      discount: data.discount !== undefined ? data.discount : prev.discount,
+      category: data.category || prev.category,
+      isTrending: data.isTrending !== undefined ? data.isTrending : prev.isTrending,
+      isNewArrival: data.isNewArrival !== undefined ? data.isNewArrival : prev.isNewArrival,
+      details: {
+        ...prev.details,
+        material: data.details?.material || prev.details.material,
+        color: data.details?.color || prev.details.color,
+        instructions: data.details?.instructions || prev.details.instructions,
+        sizes:
+          data.details?.sizes && data.details.sizes.length > 0
+            ? data.details.sizes
+            : prev.details.sizes,
+      },
+    }));
+    if (data.newImageFile) {
+      setNewImages((prev) => [...prev, data.newImageFile]);
+    }
+  };
+
   if (initialLoading) {
     return (
       <Loader
@@ -511,6 +539,15 @@ export default function AdminEditProduct() {
         </div>
 
         <div className="flex items-center gap-2 flex-nowrap shrink-0 overflow-x-auto whitespace-nowrap">
+          <Button
+            type="default"
+            onClick={() => setIsAiModalOpen(true)}
+            icon={<ThunderboltOutlined className="text-amber-500" />}
+            className="rounded-full! text-xs! font-bold! text-[#5433eb]! bg-purple-50! hover:bg-purple-100! border-purple-200! h-auto! py-2.5! px-3.5! whitespace-nowrap! shrink-0! shadow-xs!"
+          >
+            ✨ Magic AI Enhance
+          </Button>
+
           <Button
             onClick={handleDiscardDraft}
             icon={<ReloadOutlined />}
@@ -1187,6 +1224,14 @@ export default function AdminEditProduct() {
           </div>
         </div>
       </div>
+
+      <AiProductGeneratorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        categories={categories}
+        existingImages={existingImages}
+        onApply={handleApplyAiData}
+      />
     </div>
   );
 }

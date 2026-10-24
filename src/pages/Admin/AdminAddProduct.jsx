@@ -16,6 +16,7 @@ import {
   getCategoriesApi,
 } from "../../services/adminService";
 import Loader from "../../components/Loader";
+import AiProductGeneratorModal from "../../components/Admin/AiProductGeneratorModal";
 
 export default function AdminAddProduct() {
   const [formData, setFormData] = useState({
@@ -37,6 +38,7 @@ export default function AdminAddProduct() {
 
   const fileInputRef = useRef();
   const [loading, setLoading] = useState(false);
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [selectedCollection, setSelectedCollection] = useState("all");
   const [newSizeName, setNewSizeName] = useState("");
@@ -312,6 +314,31 @@ export default function AdminAddProduct() {
       },
     });
   };
+
+  const handleApplyAiData = (data) => {
+    setFormData((prev) => ({
+      ...prev,
+      name: data.name || prev.name,
+      description: data.description || prev.description,
+      price: data.price || prev.price,
+      discount: data.discount !== undefined ? data.discount : prev.discount,
+      category: data.category || prev.category,
+      isTrending: data.isTrending !== undefined ? data.isTrending : prev.isTrending,
+      isNewArrival: data.isNewArrival !== undefined ? data.isNewArrival : prev.isNewArrival,
+      images: data.newImageFile ? [...prev.images, data.newImageFile] : prev.images,
+      details: {
+        ...prev.details,
+        material: data.details?.material || prev.details.material,
+        color: data.details?.color || prev.details.color,
+        instructions: data.details?.instructions || prev.details.instructions,
+        sizes:
+          data.details?.sizes && data.details.sizes.length > 0
+            ? data.details.sizes
+            : prev.details.sizes,
+      },
+    }));
+  };
+
   return (
     <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-200">
       {loading && (
@@ -367,6 +394,15 @@ export default function AdminAddProduct() {
 
         <div className="flex items-center gap-3">
           <Button
+            type="default"
+            onClick={() => setIsAiModalOpen(true)}
+            icon={<ThunderboltOutlined className="text-amber-500" />}
+            className="rounded-full! text-xs! font-bold! text-[#5433eb]! bg-purple-50! hover:bg-purple-100! border-purple-200! h-auto! py-2! px-4! flex! items-center! gap-2! shadow-xs!"
+          >
+            ✨ Magic AI Autofill
+          </Button>
+
+          <Button
             onClick={clearData}
             className="rounded-full! text-xs! font-semibold! text-text-primary! bg-surface! hover:bg-canvas! border-border! h-auto! py-2! px-4!"
           >
@@ -394,6 +430,34 @@ export default function AdminAddProduct() {
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <div className="lg:col-span-8 space-y-6">
+          {/* AI Quick Fill Hero Banner */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-500/10 via-indigo-500/5 to-transparent border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+            <div className="flex items-center gap-3.5">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-[#5433eb] to-[#8c52ff] text-white flex items-center justify-center text-lg shadow-violet-glow shrink-0">
+                <ThunderboltOutlined />
+              </div>
+              <div>
+                <p className="text-sm font-bold m-0 text-text-primary flex items-center gap-2">
+                  1-Click "Magic" Product Generator
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-[#5433eb] uppercase tracking-wider">
+                    AI Vision
+                  </span>
+                </p>
+                <p className="text-xs text-text-secondary m-0 mt-0.5">
+                  Upload a photo or type a title — Gemini AI auto-generates persuasive copy, details, care guides &amp; sizes.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="primary"
+              onClick={() => setIsAiModalOpen(true)}
+              icon={<ThunderboltOutlined />}
+              className="rounded-full! bg-gradient-to-r! from-[#5433eb]! to-[#7c3aed]! text-white! text-xs! font-bold! h-auto! py-2! px-5! border-0! shadow-violet-glow! shrink-0!"
+            >
+              Generate with AI
+            </Button>
+          </div>
+
           <div className="bg-surface rounded-card p-6 sm:p-7 border border-border shadow-level-1 space-y-5">
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold text-text-primary">
@@ -996,6 +1060,14 @@ export default function AdminAddProduct() {
           </div>
         </div>
       </div>
+
+      <AiProductGeneratorModal
+        isOpen={isAiModalOpen}
+        onClose={() => setIsAiModalOpen(false)}
+        categories={categories}
+        existingImages={formData.images}
+        onApply={handleApplyAiData}
+      />
     </div>
   );
 }

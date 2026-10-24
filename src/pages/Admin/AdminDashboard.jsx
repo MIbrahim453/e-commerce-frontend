@@ -18,6 +18,8 @@ import {
   getProductStatsApi,
   getRevenueStatsApi,
 } from "../../services/adminService";
+import AiStoreAnalyticsCard from "../../components/Admin/AiStoreAnalyticsCard";
+import AiInventoryPricingSection from "../../components/Admin/AiInventoryPricingSection";
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState("All");
@@ -229,6 +231,12 @@ export default function AdminDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Admin Intelligence: "Ask Your Store" Natural Language Analytics */}
+      <AiStoreAnalyticsCard />
+
+      {/* Smart Inventory & Dynamic Pricing Assistant */}
+      <AiInventoryPricingSection />
 
       {/* Activity Table Container */}
       <div className="bg-surface rounded-2xl border border-border shadow-xs overflow-hidden">
