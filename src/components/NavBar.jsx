@@ -1,5 +1,5 @@
 import { useState, useContext, useRef, useEffect } from "react";
-import { Layout, Badge, Avatar, Drawer } from "antd";
+import { Badge, Avatar, Drawer } from "antd";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ShoppingCartOutlined,
@@ -16,8 +16,6 @@ import logo from "../assets/logo/logo.png";
 import NavSearchBar from "./NavSearchBar";
 import { AuthContext } from "../context/authContext";
 import { CartContext } from "../context/cartContext";
-
-const { Header } = Layout;
 
 const navLinks = [
   { to: "/", label: "Discover", exact: true },
@@ -81,7 +79,7 @@ function NavBar() {
   };
 
   return (
-    <Header className="bg-transparent! sticky! top-0! z-50! p-0! h-auto! leading-normal! border-0!">
+    <header className="bg-transparent! sticky! top-0! z-50! p-0! h-auto! leading-normal! border-0!">
       {/* Floating Pill Container (Screenshot 4 Reference) */}
       <div className="w-full! px-3! sm:px-6! lg:px-8! pt-2.5! sm:pt-3.5! pb-1.5!">
         <div className="max-w-6xl! mx-auto! bg-white/95! backdrop-blur-xl! border! border-black/8! dark:border-white/10! shadow-[0_4px_24px_rgba(0,0,0,0.06)]! rounded-2xl! sm:rounded-full! px-3.5! sm:px-6! py-2! sm:py-2.5! flex! items-center! justify-between! gap-3!">
@@ -322,7 +320,7 @@ function NavBar() {
           </Link>
         </div>
       </Drawer>
-    </Header>
+    </header>
   );
 }
 

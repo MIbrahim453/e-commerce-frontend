@@ -78,9 +78,9 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative! w-full! -mt-[68px]! sm:-mt-[76px]! lg:-mt-[78px]! pb-3!">
+    <section className="relative! w-full! -mt-[74px]! sm:-mt-[78px]! pb-0!">
       {/* Hero Outer Wrapper extending all the way behind the navbar to eliminate white space */}
-      <div className="relative! w-full! h-[520px]! sm:h-[550px]! lg:h-[570px]! rounded-b-3xl! sm:rounded-b-[36px]! overflow-hidden! shadow-lg! border-b! border-black/10!">
+      <div className="relative! w-full! h-screen! rounded-none! overflow-hidden! shadow-md!">
         {/* Ant Design Carousel Component */}
         <Carousel
           ref={carouselRef}
@@ -94,7 +94,7 @@ export default function Hero() {
           {slides.map((slide, index) => (
             <div
               key={slide.id}
-              className="relative! w-full! h-[520px]! sm:h-[550px]! lg:h-[570px]! outline-none!"
+              className="relative! w-full! h-screen! outline-none!"
             >
               {/* Slide Background Image */}
               <img
@@ -112,8 +112,8 @@ export default function Hero() {
               <div className="absolute! top-1/4! left-1/6! w-72! h-72! bg-[#5433eb]/20! rounded-full! blur-[100px]! pointer-events-none!" />
 
               {/* Content Layer Inside Slide - Padded top so content sits perfectly below floating navbar */}
-              <div className="relative! z-10! w-full! h-full! flex! flex-col! justify-center! pt-20! sm:pt-24! lg:pt-26! pb-12! px-5! sm:px-10! lg:px-16! max-w-7xl! mx-auto!">
-                <div className="max-w-2xl! flex! flex-col! items-start! gap-2! sm:gap-3!">
+              <div className="relative! z-10! w-full! h-full! flex! flex-col! justify-center! pt-20! sm:pt-24! lg:pt-26! pb-14! px-5! sm:px-10! lg:px-16! max-w-7xl! mx-auto!">
+                <div className="max-w-2xl! flex! flex-col! items-start! gap-2! sm:gap-2.5!">
                   {/* Live Kicker Pill */}
                   <motion.div
                     key={`kicker-${activeSlide}`}
@@ -137,7 +137,7 @@ export default function Hero() {
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.1 }}
-                    className="text-2xl! sm:text-4xl! lg:text-[44px]! xl:text-[48px]! font-extrabold! text-white! leading-[1.12]! m-0! tracking-[-0.035em]!"
+                    className="text-2xl! sm:text-3xl! lg:text-[38px]! xl:text-[42px]! font-extrabold! text-white! leading-[1.15]! m-0! tracking-[-0.03em]!"
                   >
                     {slide.titlePrimary}{" "}
                     <span className="bg-gradient-to-r! from-white! via-white! to-white/75! bg-clip-text! text-transparent!">
@@ -219,7 +219,7 @@ export default function Hero() {
         </div>
 
         {/* Floating Bottom Slide Switcher Tabs */}
-        <div className="absolute! bottom-3.5! sm:bottom-4! inset-x-4! sm:inset-x-8! z-20! flex! items-center! justify-center!">
+        <div className="absolute! bottom-3! sm:bottom-3.5! inset-x-4! sm:inset-x-8! z-20! flex! items-center! justify-center!">
           <div className="bg-black/50! backdrop-blur-xl! border! border-white/15! rounded-full! p-1! sm:p-1.5! flex! items-center! gap-1! sm:gap-2! max-w-full! overflow-x-auto!">
             {slides.map((slide, idx) => {
               const isActive = activeSlide === idx;
