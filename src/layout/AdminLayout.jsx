@@ -6,7 +6,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import { ConfigProvider, Avatar, Button, Dropdown, Drawer } from "antd";
+import { ConfigProvider, Avatar, Button, Dropdown, Drawer, message } from "antd";
 import { AuthContext } from "../context/authContext";
 import logo from "../assets/logo/logo.png";
 import {
@@ -36,6 +36,7 @@ export default function AdminLayout() {
 
   const handleLogout = async () => {
     await logout();
+    message.success("Logged out successfully");
     navigate("/login");
   };
 

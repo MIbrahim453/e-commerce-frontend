@@ -81,6 +81,8 @@ export default function OrdersTab({ onOrdersLoaded }) {
             if (selectedOrder?._id === orderId) {
               setSelectedOrder(null);
             }
+          } else {
+            message.error(res?.data?.message || "Failed to cancel order");
           }
         } catch (err) {
           message.error(

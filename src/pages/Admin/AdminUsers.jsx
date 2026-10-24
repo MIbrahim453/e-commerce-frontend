@@ -121,11 +121,11 @@ export default function AdminUsers() {
 
   const handleSubmit = async () => {
     if (!form.firstName || !form.lastName || !form.email) {
-      antdMessage.error("First name, last name, and email are required");
+      antdMessage.warning("First name, last name, and email are required");
       return;
     }
     if (modalMode === "create" && !form.password) {
-      antdMessage.error("Password is required for new users");
+      antdMessage.warning("Password is required for new users");
       return;
     }
 

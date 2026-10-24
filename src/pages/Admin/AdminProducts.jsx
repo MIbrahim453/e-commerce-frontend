@@ -131,6 +131,8 @@ export default function AdminProducts() {
         message.success(res.data.message || "Product deleted successfully");
         setProducts((prev) => prev.filter((p) => (p._id || p.id) !== id));
         fetchProductStats();
+      } else {
+        message.error(res?.data?.message || "Failed to delete product.");
       }
     } catch (error) {
       console.error("Error deleting product:", error);
@@ -196,10 +198,14 @@ export default function AdminProducts() {
             (p._id || p.id) === id ? { ...p, isTrending: nextStatus } : p,
           ),
         );
+      } else {
+        message.error(res?.data?.message || "Failed to update trending status.");
       }
     } catch (error) {
       console.error(error);
-      message.error("Failed to update trending status.");
+      message.error(
+        error.response?.data?.message || "Failed to update trending status.",
+      );
     }
   };
 
@@ -227,10 +233,16 @@ export default function AdminProducts() {
           }
           return updated;
         });
+      } else {
+        message.error(
+          res?.data?.message || "Failed to update new arrival status.",
+        );
       }
     } catch (error) {
       console.error(error);
-      message.error("Failed to update new arrival status.");
+      message.error(
+        error.response?.data?.message || "Failed to update new arrival status.",
+      );
     }
   };
 

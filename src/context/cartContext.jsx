@@ -51,7 +51,8 @@ export function CartProvider({ children }) {
             : item,
         );
         setCart(updatedCart);
-        message.success("Product quantity updated in cart");
+        message.success(`${product.name || "Product"} quantity updated in cart`);
+        return true;
       } else {
         const newItem = {
           _id: product._id,
@@ -69,11 +70,13 @@ export function CartProvider({ children }) {
         };
 
         setCart([...cart, newItem]);
-        message.success("Product added to cart");
+        message.success(`${product.name || "Product"} added to cart`);
+        return true;
       }
     } catch (error) {
       message.error("Failed to add product to cart");
       console.error(error);
+      return false;
     }
   };
 
@@ -87,11 +90,14 @@ export function CartProvider({ children }) {
       console.error(error);
     }
   };
-  const clearCart = async () => {
+
+  const clearCart = async (showNotification = true) => {
     try {
       setCart([]);
       localStorage.removeItem("cart");
-      message.success("Cart cleared successfully");
+      if (showNotification) {
+        message.success("Cart cleared successfully");
+      }
     } catch (error) {
       message.error("Failed to clear cart");
       console.error(error);

@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Button, Tooltip } from "antd";
+import { Button, Tooltip, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import {
   CalendarOutlined,
@@ -21,6 +21,7 @@ export default function ProfileHeader({ onEditClick, stats = {} }) {
 
   const handleLogout = async () => {
     await logout();
+    message.success("Logged out successfully");
     navigate("/login");
   };
 

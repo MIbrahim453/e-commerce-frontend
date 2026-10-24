@@ -43,7 +43,9 @@ export default function AdminPayments() {
       }
     } catch (err) {
       console.error("Failed to load admin payments:", err);
-      message.error("Failed to load payments");
+      message.error(
+        err?.response?.data?.message || "Failed to load payments",
+      );
     } finally {
       setLoading(false);
     }

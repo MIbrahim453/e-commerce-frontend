@@ -450,6 +450,8 @@ export default function AdminEditProduct() {
         }
         message.success(res.data.message || "Product updated successfully!");
         navigate("/admin/products");
+      } else {
+        message.error(res?.data?.message || "Failed to update product details.");
       }
     } catch (error) {
       console.error("Error editing product:", error);

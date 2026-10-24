@@ -57,7 +57,7 @@ function AuthProvider({ children }) {
     setLoading(true);
     try {
       const res = await registerApi(data);
-      if (res.data.success) return res;
+      return res;
     } catch (error) {
       console.error(error);
       return error.response?.data || { success: false, message: error.message };
@@ -161,7 +161,7 @@ function AuthProvider({ children }) {
     setLoading(true);
     try {
       const res = await forgotPasswordApi(email);
-      if (res.data.success) {
+      if (res.data?.success) {
         const tokenExpiry = new Date(Date.now() + 60 * 60 * 1000);
         localStorage.setItem("tokenExpiry", tokenExpiry.toISOString());
       }

@@ -281,6 +281,8 @@ export default function AdminAddProduct() {
       if (res && res.data?.success) {
         message.success(res.data.message || "Product created successfully");
         clearData();
+      } else {
+        message.error(res?.data?.message || "Failed to add product");
       }
     } catch (error) {
       console.error(error);

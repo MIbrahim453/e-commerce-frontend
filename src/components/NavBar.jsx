@@ -1,5 +1,5 @@
 import { useState, useContext, useRef, useEffect } from "react";
-import { Badge, Avatar, Drawer } from "antd";
+import { Badge, Avatar, Drawer, message } from "antd";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ShoppingCartOutlined,
@@ -75,6 +75,7 @@ function NavBar() {
   const handleLogout = async () => {
     await logout();
     setUserDropdown(false);
+    message.success("Logged out successfully");
     navigate("/login");
   };
 

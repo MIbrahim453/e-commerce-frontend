@@ -82,9 +82,8 @@ export default function TrendingProducts() {
         finalPrice
       );
 
-      if (success !== false) {
+      if (success) {
         setAddedAnimation((prev) => ({ ...prev, [pid]: true }));
-        message.success(`${product.name} added to bag!`);
         setTimeout(() => {
           setAddedAnimation((prev) => ({ ...prev, [pid]: false }));
         }, 1800);

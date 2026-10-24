@@ -91,12 +91,12 @@ export default function ProductReviews({
     }
 
     if (!rating || rating < 1) {
-      message.error("Please choose a star rating");
+      message.warning("Please choose a star rating");
       return;
     }
 
     if (!reviewText.trim()) {
-      message.error("Please write a review comment");
+      message.warning("Please write a review comment");
       return;
     }
 
@@ -112,6 +112,8 @@ export default function ProductReviews({
           message.success("Review updated successfully");
           handleCancelEdit();
           await fetchReviews();
+        } else {
+          message.error(res?.data?.message || "Failed to update review");
         }
       } else {
         const res = await createReviewApi(productId, {
@@ -123,6 +125,8 @@ export default function ProductReviews({
           setReviewText("");
           setRating(5);
           await fetchReviews();
+        } else {
+          message.error(res?.data?.message || "Failed to submit review");
         }
       }
     } catch (err) {
@@ -149,6 +153,8 @@ export default function ProductReviews({
               handleCancelEdit();
             }
             await fetchReviews();
+          } else {
+            message.error(res?.data?.message || "Failed to delete review");
           }
         } catch (err) {
           message.error(

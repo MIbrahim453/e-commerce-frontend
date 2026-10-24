@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { message } from "antd";
 import {
   CheckCircleFilled,
   ClockCircleFilled,
@@ -20,9 +21,14 @@ export default function PaymentsTab() {
       const res = await getUserPaymentsApi();
       if (res?.data?.success) {
         setPayments(res.data.data?.payments || []);
+      } else {
+        message.error(res?.data?.message || "Failed to load payment history");
       }
     } catch (err) {
       console.error("Failed to load user payments:", err);
+      message.error(
+        err?.response?.data?.message || "Failed to load payment history",
+      );
     } finally {
       setLoading(false);
     }

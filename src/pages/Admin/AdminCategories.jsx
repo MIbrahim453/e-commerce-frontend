@@ -107,6 +107,8 @@ export default function AdminCategories() {
         message.success(res.data.message || "Category created successfully!");
         setName("");
         await fetchCategories();
+      } else {
+        message.error(res?.data?.message || "Failed to create category");
       }
     } catch (error) {
       console.error("Error creating category:", error);
