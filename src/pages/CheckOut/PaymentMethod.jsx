@@ -3,7 +3,7 @@ import {
   LockFilled,
   WalletFilled,
   CarOutlined,
-  CreditCardOutlined,
+  // CreditCardOutlined, // Kept for future card payment integration
   InfoCircleOutlined,
 } from "@ant-design/icons";
 
@@ -31,7 +31,7 @@ export default function PaymentMethod({ paymentMethod = "COD", onChange }) {
         </div>
       </div>
 
-      <div className="grid! grid-cols-1! sm:grid-cols-2! gap-3! mb-4!">
+      <div className="grid! grid-cols-1! gap-3! mb-4!">
         <div
           onClick={() => handleSelect("COD")}
           className={`cursor-pointer! rounded-2xl! p-4! border-2! transition-all! flex! flex-col! justify-between! gap-2! ${paymentMethod === "COD"
@@ -75,6 +75,8 @@ export default function PaymentMethod({ paymentMethod = "COD", onChange }) {
           </span>
         </div>
 
+        {/* Card Payment Method - Commented out for future inclusion */}
+        {/*
         <div
           onClick={() => handleSelect("CARD")}
           className={`cursor-pointer! rounded-2xl! p-4! border-2! transition-all! flex! flex-col! justify-between! gap-2! ${paymentMethod === "CARD"
@@ -117,6 +119,7 @@ export default function PaymentMethod({ paymentMethod = "COD", onChange }) {
             Instant Dispatch Priority
           </span>
         </div>
+        */}
       </div>
 
       {paymentMethod === "COD" ? (
@@ -151,6 +154,8 @@ export default function PaymentMethod({ paymentMethod = "COD", onChange }) {
           </div>
         </div>
       ) : (
+        /* Card Information section - Commented out for future inclusion */
+        /*
         <div className="bg-[#f8f9fa]! rounded-2xl! border! border-[#ebebeb]! p-4! sm:p-5! flex! flex-col! gap-3.5!">
           <div className="flex! items-center! justify-between!">
             <div className="flex! items-center! gap-2! text-xs! sm:text-sm! font-bold! text-[#1a1a1a]!">
@@ -213,6 +218,8 @@ export default function PaymentMethod({ paymentMethod = "COD", onChange }) {
             </div>
           </div>
         </div>
+        */
+        null
       )}
     </div>
   );
